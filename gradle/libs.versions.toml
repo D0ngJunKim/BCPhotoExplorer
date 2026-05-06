@@ -2,6 +2,7 @@
 agp = "9.2.0"
 ksp = "2.1.21-2.0.2"
 hilt = "2.59.2"
+timber = "5.0.1"
 coil = "3.4.0"
 coreKtx = "1.18.0"
 activityCompose = "1.13.0"
@@ -9,6 +10,8 @@ kotlin = "2.2.10"
 composeBom = "2026.04.01"
 constraintlayoutCompose = "1.1.1"
 appcompat = "1.7.1"
+retrofit = "3.0.0"
+paging = "3.4.2"
 
 [libraries]
 # Gradle Plugin Usage
@@ -24,6 +27,14 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+# Network
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
 # Feature
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
