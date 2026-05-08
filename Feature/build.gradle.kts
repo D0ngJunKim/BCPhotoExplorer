@@ -19,6 +19,7 @@ android {
 
 dependencies {
     implementation(project(":Environment:Network"))
+    implementation(project(":Environment:Navigation"))
     api(project(":Environment:DesignSystem"))
 
     implementation(libs.androidx.appcompat)
