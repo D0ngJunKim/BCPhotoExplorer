@@ -8,9 +8,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavBackStackEntry
 
-typealias EnterAnim = AnimatedContentTransitionScope<IRoute?>.() -> EnterTransition
-typealias ExitAnim = AnimatedContentTransitionScope<IRoute?>.() -> ExitTransition
+typealias EnterAnim = AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?
+typealias ExitAnim = AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?
 
 private const val ANIM_DURATION = 300
 

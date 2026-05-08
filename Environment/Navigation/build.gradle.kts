@@ -1,5 +1,7 @@
 plugins {
     id("base.library")
+    id("base.ui")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -7,6 +9,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
+    api(libs.kotlinx.serialization.core)
+    api(libs.androidx.navigation.compose)
+    api(libs.hilt.navigation.compose)
+    api(libs.kotlin.reflect)
 }

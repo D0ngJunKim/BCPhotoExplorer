@@ -6,28 +6,40 @@ import com.android.build.api.dsl.LibraryExtension
 import com.bc.buildplugins.AbstractPlugin
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 class CompilePlugin : AbstractPlugin() {
     override fun Project.onApply() {
+        extensions.configure<KotlinAndroidProjectExtension> {
+            compilerOptions {
+                jvmTarget.set(resolveJvmTarget())
+            }
+        }
+
         configureApplication {
-            configureVersion()
+            configureVersion(this@onApply)
             configureApplicationBuildTypes()
             configureBuildFeatures()
         }
 
         configureLibrary {
-            configureVersion()
+            configureVersion(this@onApply)
             configureLibraryBuildTypes()
             configureBuildFeatures()
         }
     }
 
-    fun CommonExtension.configureVersion() {
+    fun CommonExtension.configureVersion(project: Project) {
         compileSdk = 36
         defaultConfig.minSdk = 24
 
-        compileOptions.sourceCompatibility = JavaVersion.VERSION_11
-        compileOptions.targetCompatibility = JavaVersion.VERSION_11
+        with(compileOptions) {
+            val javaVersion = project.resolveJavaVersion()
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
+        }
 
         compileSdk {
             version = release(36) {
@@ -72,5 +84,19 @@ class CompilePlugin : AbstractPlugin() {
 
     fun CommonExtension.configureBuildFeatures() {
         buildFeatures.buildConfig = true
+    }
+
+    private fun Project.resolveJdkVersion(): Int {
+        return providers.gradleProperty("build.jdk.version")
+            .orNull
+            ?.toIntOrNull() ?: 11
+    }
+
+    private fun Project.resolveJvmTarget(): JvmTarget {
+        return JvmTarget.fromTarget(resolveJdkVersion().toString())
+    }
+
+    private fun Project.resolveJavaVersion(): JavaVersion {
+        return JavaVersion.toVersion(resolveJdkVersion())
     }
 }

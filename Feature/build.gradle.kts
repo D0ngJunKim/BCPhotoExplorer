@@ -2,6 +2,8 @@ plugins {
     id("base.library")
     id("base.ui")
     id("base.hilt")
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -17,9 +19,17 @@ android {
     }
 }
 
+ksp {
+    arg("mainContainer.package", "com.bc.feature.generated.nav")
+    arg("mainContainer.object", "MainContainerRoutes")
+    arg("overlayContainer.package", "com.bc.feature.generated.nav")
+    arg("overlayContainer.object", "OverlayContainerRoutes")
+}
+
 dependencies {
     implementation(project(":Environment:Network"))
-    implementation(project(":Environment:Navigation"))
+    api(project(":Environment:Navigation"))
+    ksp(project(":Environment:Navigation:Ksp"))
     api(project(":Environment:DesignSystem"))
 
     implementation(libs.androidx.appcompat)
