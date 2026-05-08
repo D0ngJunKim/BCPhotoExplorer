@@ -1,22 +1,24 @@
 package com.bc.buildplugins.base
 
-import com.android.build.api.dsl.ApplicationBuildType
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.bc.buildplugins.AbstractPlugin
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.invoke
 
 class CompilePlugin : AbstractPlugin() {
     override fun Project.onApply() {
         configureApplication {
             configureVersion()
-            configureBuildTypes()
+            configureApplicationBuildTypes()
+            configureBuildFeatures()
         }
 
         configureLibrary {
             configureVersion()
-            configureBuildTypes()
+            configureLibraryBuildTypes()
+            configureBuildFeatures()
         }
     }
 
@@ -34,24 +36,41 @@ class CompilePlugin : AbstractPlugin() {
         }
     }
 
-    fun CommonExtension.configureBuildTypes() {
+    fun ApplicationExtension.configureApplicationBuildTypes() {
+        buildFeatures {
+            buildConfig = true
+        }
+
         buildTypes {
             getByName("debug") {
-                if (this is ApplicationBuildType) {
-                    isDebuggable = true
-                }
+                isDebuggable = true
                 isShrinkResources = false
                 isMinifyEnabled = false
             }
 
             getByName("release") {
-                if (this is ApplicationBuildType) {
-                    isDebuggable = false
-                }
+                isDebuggable = false
                 isShrinkResources = true
                 isMinifyEnabled = true
                 proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             }
         }
+    }
+
+    fun LibraryExtension.configureLibraryBuildTypes() {
+        buildTypes {
+            getByName("debug") {
+                isMinifyEnabled = false
+            }
+
+            getByName("release") {
+                isMinifyEnabled = true
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            }
+        }
+    }
+
+    fun CommonExtension.configureBuildFeatures() {
+        buildFeatures.buildConfig = true
     }
 }

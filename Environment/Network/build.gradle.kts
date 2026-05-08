@@ -1,9 +1,14 @@
 plugins {
     id("base.library")
+    alias(libs.plugins.secrets.gradle.plugin)
 }
 
 android {
     namespace = "com.bc.env.network"
+}
+
+secrets {
+    propertiesFileName = "local.properties"
 }
 
 dependencies {

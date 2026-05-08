@@ -10,6 +10,7 @@ class ApplicationPlugin : AbstractPlugin() {
         applyPlugin("base.compile")
         applyPlugin("base.ui")
         applyPlugin("base.hilt")
+        applyPlugin("secrets.gradle.plugin")
 
         configureApplication {
             dependencies {

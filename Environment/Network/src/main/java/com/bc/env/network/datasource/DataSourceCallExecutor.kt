@@ -42,11 +42,7 @@ internal object DataSourceCallExecutor {
 
             val body = response.body() ?: throw NetworkException.EmptyBody()
 
-            if (body.isSuccessful) {
-                return body
-            }
-
-            throw NetworkException.InvalidSuccessCode(response.code())
+            return body
         } catch (e: Exception) {
             throw e
         }

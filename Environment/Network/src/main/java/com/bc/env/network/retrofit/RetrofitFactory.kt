@@ -2,6 +2,8 @@ package com.bc.env.network.retrofit
 
 import com.bc.env.network.datasource.DataSourceConfig
 import com.bc.env.network.retrofit.interceptor.RetryInterceptor
+import com.bc.env.network.retrofit.interceptor.UnsplashInterceptor
+import com.bc.env.network.util.DomainProvider
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -26,7 +28,6 @@ internal object RetrofitFactory {
             val key = baseUrl + path + config.toString()
 
             return cache.getOrPut(key) {
-
                 val gsonBuilder = GsonBuilder()
                     .setupGson()
 
@@ -40,6 +41,10 @@ internal object RetrofitFactory {
 
                 if (config.useRetry) {
                     okHttpClientBuilder.addInterceptor(RetryInterceptor())
+                }
+
+                if (baseUrl.contains(DomainProvider.unsplash)) {
+                    okHttpClientBuilder.addInterceptor(UnsplashInterceptor())
                 }
 
                 Retrofit.Builder()

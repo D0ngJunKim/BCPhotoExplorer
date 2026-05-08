@@ -12,6 +12,7 @@ constraintlayoutCompose = "1.1.1"
 appcompat = "1.7.1"
 retrofit = "3.0.0"
 paging = "3.4.2"
+secretsGradlePlugin = "2.0.1"
 
 [libraries]
 # Gradle Plugin Usage
@@ -48,3 +49,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 android-library = { id = "com.android.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
