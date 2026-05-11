@@ -3,13 +3,13 @@ package com.bc.env.network.datasource
 import android.webkit.URLUtil
 import com.bc.env.network.constants.NetworkException
 import com.bc.env.network.request.IParams
-import com.bc.env.network.response.IResponse
 import com.bc.env.network.retrofit.RetrofitFactory
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.awaitResponse
 
 internal object DataSourceCallExecutor {
-    fun <Params : IParams, DataModel : IResponse> createCall(
+    fun <Params : IParams, DataModel : Any> createCall(
         dataSource: IDataSource<Params, DataModel>,
         params: Params?
     ): Call<DataModel> {
@@ -32,7 +32,7 @@ internal object DataSourceCallExecutor {
         return dataSource.createCall(retrofit, params)
     }
 
-    suspend fun <DataModel : IResponse> execute(call: Call<DataModel>): DataModel {
+    internal suspend fun <DataModel : Any> execute(call: Call<DataModel>): Response<DataModel> {
         try {
             val response = call.awaitResponse()
 
@@ -40,9 +40,7 @@ internal object DataSourceCallExecutor {
                 throw NetworkException.NetworkFailure(response.code())
             }
 
-            val body = response.body() ?: throw NetworkException.EmptyBody()
-
-            return body
+            return response
         } catch (e: Exception) {
             throw e
         }

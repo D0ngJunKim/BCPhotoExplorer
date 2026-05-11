@@ -1,5 +1,6 @@
 package com.ssg.env.ds.foundation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Immutable
@@ -8,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayoutBaseScope
+import androidx.constraintlayout.compose.HorizontalAnchorable
+import androidx.constraintlayout.compose.VerticalAnchorable
 
 enum class SpaceToken(internal val size: Dp) {
     Zero(0.dp),
@@ -58,6 +62,9 @@ fun Modifier.padding(
     .padding(
         paddingValues = paddingValues
     )
+
+@Stable
+fun Arrangement.spacedBy(space: SpaceToken) = this.spacedBy(space.size)
 
 @Stable
 fun SpaceTokenValues(

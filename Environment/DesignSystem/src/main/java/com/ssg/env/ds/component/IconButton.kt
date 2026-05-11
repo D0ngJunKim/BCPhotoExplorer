@@ -27,37 +27,36 @@ import com.ssg.env.ds.R
 import com.ssg.env.ds.composite.LocalImage
 import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
-import com.ssg.env.ds.foundation.SpaceTokenValues
 import com.ssg.env.ds.foundation.background
 import com.ssg.env.ds.foundation.border
 import com.ssg.env.ds.foundation.clip
 import com.ssg.env.ds.foundation.padding
 
 sealed class IconButtonType(
-    internal val size: ButtonSize,
+    internal val size: IconButtonSize,
     internal val radius: RadiusToken,
     internal val iconSize: Dp
 ) {
     data object SM : IconButtonType(
-        size = ButtonSize.SM,
+        size = IconButtonSize.SM,
+        radius = RadiusToken.SM,
+        iconSize = 16.dp
+    )
+
+    data object MD : IconButtonType(
+        size = IconButtonSize.MD,
         radius = RadiusToken.SM,
         iconSize = 20.dp
     )
 
-    data object MD : IconButtonType(
-        size = ButtonSize.MD,
-        radius = RadiusToken.SM,
-        iconSize = 24.dp
-    )
-
     data object LG : IconButtonType(
-        size = ButtonSize.LG,
+        size = IconButtonSize.LG,
         radius = RadiusToken.SM,
-        iconSize = 24.dp
+        iconSize = 20.dp
     )
 
     data object XL : IconButtonType(
-        size = ButtonSize.XL,
+        size = IconButtonSize.XL,
         radius = RadiusToken.SM,
         iconSize = 28.dp
     )
@@ -75,6 +74,7 @@ data class IconButtonConfig(
     private val type: IconButtonType,
     private val radius: Option.Radius,
     internal val normalColorSet: IconButtonColorSet,
+    internal val selectedColorSet: IconButtonColorSet = normalColorSet,
     internal val disabledColorSet: IconButtonColorSet = normalColorSet
 ) {
     internal val heightDp = type.size.height
@@ -110,10 +110,15 @@ fun IconButton(
     onClick: () -> Unit,
     buttonDescription: String,
     modifier: Modifier = Modifier,
-    padding: SpaceTokenValues = SpaceTokenValues(all = SpaceToken.Zero),
-    enabled: Boolean = true
+    padding: SpaceToken = SpaceToken.Zero,
+    enabled: Boolean = true,
+    selected: Boolean = false,
 ) {
-    val colorSet = if (enabled) config.normalColorSet else config.disabledColorSet
+    val colorSet = if (enabled) {
+        if (selected) config.selectedColorSet else config.normalColorSet
+    } else {
+        config.disabledColorSet
+    }
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = config.heightDp)
@@ -121,7 +126,7 @@ fun IconButton(
             .clip(config.radiusToken)
             .background(colorSet.fillColor, config.radiusToken)
             .border(width = 1.dp, color = colorSet.outlineColor, token = config.radiusToken)
-            .padding(padding)
+            .padding(horizontal = padding)
             .clickable(
                 enabled = enabled,
                 role = Role.Button,
@@ -184,7 +189,7 @@ private fun Preview() {
             painter = painterResource(R.drawable.ico_heart),
             onClick = {},
             buttonDescription = "좋아요",
-            padding = SpaceTokenValues(horizontal = SpaceToken.XXXS)
+            padding = SpaceToken.XXXS
         )
         IconButton(
             config = IconButtonConfig(

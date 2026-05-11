@@ -1,12 +1,13 @@
 package com.bc.env.network.datasource
 
 import androidx.paging.PagingSource
+import com.bc.env.network.constants.NetworkException
 import com.bc.env.network.request.PagingLoadParams
-import com.bc.env.network.response.IResponse
+import okhttp3.Headers
 
 abstract class BasePagingSource<DataModel, DomainModel> : PagingSource<PagingLoadParams, DomainModel>(), IDataSource<PagingLoadParams, DataModel>
-        where DataModel : IResponse, DomainModel : Any {
-    protected abstract fun hasNextPage(params: PagingLoadParams?, body: DataModel): Boolean
+        where DataModel : Any, DomainModel : Any {
+    protected abstract fun hasNextPage(params: PagingLoadParams?, headers: Headers, body: DataModel): Boolean
     protected abstract fun mapToDomain(params: PagingLoadParams?, body: DataModel): List<DomainModel>
 
     override suspend fun load(params: LoadParams<PagingLoadParams>): LoadResult<PagingLoadParams, DomainModel> {
@@ -14,11 +15,13 @@ abstract class BasePagingSource<DataModel, DomainModel> : PagingSource<PagingLoa
             val requestParams = params.key
             val page = requestParams?.page ?: 1
 
-            val body = DataSourceCallExecutor.execute(
+            val response = DataSourceCallExecutor.execute(
                 call = DataSourceCallExecutor.createCall(this, requestParams)
             )
+            val headers = response.headers()
+            val body = response.body() ?: throw NetworkException.EmptyBody()
 
-            val hasNext = hasNextPage(requestParams, body)
+            val hasNext = hasNextPage(requestParams, headers, body)
 
             LoadResult.Page(
                 data = mapToDomain(requestParams, body),

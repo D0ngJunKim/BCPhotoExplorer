@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Dto 예외처리
+-keep class **.data.model.** { *; }
+-keep class **.model.** { *; }

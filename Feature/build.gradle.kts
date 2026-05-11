@@ -17,6 +17,11 @@ android {
             manifestPlaceholders["networkSecurityConfig"] = "@null"
         }
     }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
+    }
 }
 
 ksp {
@@ -34,6 +39,12 @@ dependencies {
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.coil.compose)
+
+    api(libs.coil.compose)
     implementation(libs.coil.network)
+
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
 }

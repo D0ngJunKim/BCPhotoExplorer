@@ -1,0 +1,317 @@
+package com.bc.core.presentation.ui
+
+import android.graphics.Bitmap
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.roundToInt
+import kotlin.math.withSign
+import android.graphics.Color as AndroidColor
+import androidx.compose.ui.graphics.Color as ComposeColor
+
+@Composable
+fun AsyncImageBlurHash(
+    model: Any,
+    blurHash: String?,
+    width: Int,
+    height: Int,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    primaryColor: ComposeColor? = null,
+    contentScale: ContentScale = ContentScale.Crop
+) {
+    val blurBitmap by produceState<Bitmap?>(initialValue = null, blurHash, width, height) {
+        if (blurHash == null || width <= 0 || height <= 0) {
+            value = null
+            return@produceState
+        }
+
+        value = withContext(Dispatchers.Default) {
+            try {
+                val decodeWidth = BlurHashBitmapWidth
+                val decodeHeight = (decodeWidth * height.toFloat() / width)
+                    .roundToInt()
+                    .coerceAtLeast(1)
+
+                BlurHashDecoder.decode(
+                    blurHash = blurHash,
+                    width = decodeWidth,
+                    height = decodeHeight,
+                    useCache = false
+                )
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    if (blurHash != null) {
+        val context = LocalContext.current
+        var imageLoaded by remember(model) { mutableStateOf(false) }
+        val imageAlpha by animateFloatAsState(
+            targetValue = if (imageLoaded) 1f else 0f,
+            animationSpec = tween(durationMillis = CrossfadeDurationMillis)
+        )
+        val blurAlpha by animateFloatAsState(
+            targetValue = if (imageLoaded) 0f else 1f,
+            animationSpec = tween(durationMillis = CrossfadeDurationMillis)
+        )
+        val requestModel = remember(context, model) {
+            ImageRequest.Builder(context).data(model).build()
+        }
+
+        Box(modifier = modifier) {
+            val currentBlurBitmap = blurBitmap
+            if (currentBlurBitmap != null) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { alpha = blurAlpha },
+                    bitmap = currentBlurBitmap.asImageBitmap(),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
+                )
+            } else if (!imageLoaded) {
+                InternalBox(primaryColor)
+            }
+
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { alpha = imageAlpha },
+                model = requestModel,
+                contentDescription = contentDescription,
+                contentScale = contentScale,
+                onLoading = {
+                    imageLoaded = false
+                },
+                onSuccess = {
+                    imageLoaded = true
+                },
+                onError = {
+                    imageLoaded = false
+                }
+            )
+        }
+    } else {
+        AsyncImage(
+            modifier = modifier,
+            model = model,
+            contentDescription = contentDescription,
+            contentScale = contentScale
+        )
+    }
+}
+
+@Composable
+private fun InternalBox(primaryColor: ComposeColor?) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(primaryColor ?: ComposeColor.LightGray)
+    )
+}
+
+private const val BlurHashBitmapWidth = 32
+private const val CrossfadeDurationMillis = 700
+
+
+object BlurHashDecoder {
+
+    // cache Math.cos() calculations to improve performance.
+    // The number of calculations can be huge for many bitmaps: width * height * numCompX * numCompY * 2 * nBitmaps
+    // the cache is enabled by default, it is recommended to disable it only when just a few images are displayed
+    private val cacheCosinesX = HashMap<Int, DoubleArray>()
+    private val cacheCosinesY = HashMap<Int, DoubleArray>()
+
+    /**
+     * Clear calculations stored in memory cache.
+     * The cache is not big, but will increase when many image sizes are used,
+     * if the app needs memory it is recommended to clear it.
+     */
+    fun clearCache() {
+        cacheCosinesX.clear()
+        cacheCosinesY.clear()
+    }
+
+    /**
+     * Decode a blur hash into a new bitmap.
+     *
+     * @param useCache use in memory cache for the calculated math, reused by images with same size.
+     *                 if the cache does not exist yet it will be created and populated with new calculations.
+     *                 By default it is true.
+     */
+    fun decode(blurHash: String?, width: Int, height: Int, punch: Float = 1f, useCache: Boolean = true): Bitmap? {
+        if (blurHash == null || blurHash.length < 6) {
+            return null
+        }
+        val numCompEnc = decode83(blurHash, 0, 1)
+        val numCompX = (numCompEnc % 9) + 1
+        val numCompY = (numCompEnc / 9) + 1
+        if (blurHash.length != 4 + 2 * numCompX * numCompY) {
+            return null
+        }
+        val maxAcEnc = decode83(blurHash, 1, 2)
+        val maxAc = (maxAcEnc + 1) / 166f
+        val colors = Array(numCompX * numCompY) { i ->
+            if (i == 0) {
+                val colorEnc = decode83(blurHash, 2, 6)
+                decodeDc(colorEnc)
+            } else {
+                val from = 4 + i * 2
+                val colorEnc = decode83(blurHash, from, from + 2)
+                decodeAc(colorEnc, maxAc * punch)
+            }
+        }
+        return composeBitmap(width, height, numCompX, numCompY, colors, useCache)
+    }
+
+    private fun decode83(str: String, from: Int = 0, to: Int = str.length): Int {
+        var result = 0
+        for (i in from until to) {
+            val index = charMap[str[i]] ?: -1
+            if (index != -1) {
+                result = result * 83 + index
+            }
+        }
+        return result
+    }
+
+    private fun decodeDc(colorEnc: Int): FloatArray {
+        val r = colorEnc shr 16
+        val g = (colorEnc shr 8) and 255
+        val b = colorEnc and 255
+        return floatArrayOf(srgbToLinear(r), srgbToLinear(g), srgbToLinear(b))
+    }
+
+    private fun srgbToLinear(colorEnc: Int): Float {
+        val v = colorEnc / 255f
+        return if (v <= 0.04045f) {
+            (v / 12.92f)
+        } else {
+            ((v + 0.055f) / 1.055f).pow(2.4f)
+        }
+    }
+
+    private fun decodeAc(value: Int, maxAc: Float): FloatArray {
+        val r = value / (19 * 19)
+        val g = (value / 19) % 19
+        val b = value % 19
+        return floatArrayOf(
+            signedPow2((r - 9) / 9.0f) * maxAc,
+            signedPow2((g - 9) / 9.0f) * maxAc,
+            signedPow2((b - 9) / 9.0f) * maxAc
+        )
+    }
+
+    private fun signedPow2(value: Float) = value.pow(2f).withSign(value)
+
+    private fun composeBitmap(
+        width: Int, height: Int,
+        numCompX: Int, numCompY: Int,
+        colors: Array<FloatArray>,
+        useCache: Boolean
+    ): Bitmap {
+        // use an array for better performance when writing pixel colors
+        val imageArray = IntArray(width * height)
+        val calculateCosX = !useCache || !cacheCosinesX.containsKey(width * numCompX)
+        val cosinesX = getArrayForCosinesX(calculateCosX, width, numCompX)
+        val calculateCosY = !useCache || !cacheCosinesY.containsKey(height * numCompY)
+        val cosinesY = getArrayForCosinesY(calculateCosY, height, numCompY)
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                var r = 0f
+                var g = 0f
+                var b = 0f
+                for (j in 0 until numCompY) {
+                    for (i in 0 until numCompX) {
+                        val cosX = cosinesX.getCos(calculateCosX, i, numCompX, x, width)
+                        val cosY = cosinesY.getCos(calculateCosY, j, numCompY, y, height)
+                        val basis = (cosX * cosY).toFloat()
+                        val color = colors[j * numCompX + i]
+                        r += color[0] * basis
+                        g += color[1] * basis
+                        b += color[2] * basis
+                    }
+                }
+                imageArray[x + width * y] = AndroidColor.rgb(linearToSrgb(r), linearToSrgb(g), linearToSrgb(b))
+            }
+        }
+        return Bitmap.createBitmap(imageArray, width, height, Bitmap.Config.ARGB_8888)
+    }
+
+    private fun getArrayForCosinesY(calculate: Boolean, height: Int, numCompY: Int) = when {
+        calculate -> {
+            DoubleArray(height * numCompY).also {
+                cacheCosinesY[height * numCompY] = it
+            }
+        }
+
+        else -> {
+            cacheCosinesY[height * numCompY]!!
+        }
+    }
+
+    private fun getArrayForCosinesX(calculate: Boolean, width: Int, numCompX: Int) = when {
+        calculate -> {
+            DoubleArray(width * numCompX).also {
+                cacheCosinesX[width * numCompX] = it
+            }
+        }
+
+        else -> cacheCosinesX[width * numCompX]!!
+    }
+
+    private fun DoubleArray.getCos(
+        calculate: Boolean,
+        x: Int,
+        numComp: Int,
+        y: Int,
+        size: Int
+    ): Double {
+        if (calculate) {
+            this[x + numComp * y] = cos(Math.PI * y * x / size)
+        }
+        return this[x + numComp * y]
+    }
+
+    private fun linearToSrgb(value: Float): Int {
+        val v = value.coerceIn(0f, 1f)
+        return if (v <= 0.0031308f) {
+            (v * 12.92f * 255f + 0.5f).toInt()
+        } else {
+            ((1.055f * v.pow(1 / 2.4f) - 0.055f) * 255 + 0.5f).toInt()
+        }
+    }
+
+    private val charMap = listOf(
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+        'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '#', '$', '%', '*', '+', ',',
+        '-', '.', ':', ';', '=', '?', '@', '[', ']', '^', '_', '{', '|', '}', '~'
+    )
+        .mapIndexed { i, c -> c to i }
+        .toMap()
+
+}

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,6 +23,8 @@ import androidx.navigation.toRoute
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.isSubclassOf
+
+val LocalGlobalNavigator: ProvidableCompositionLocal<GlobalNavigator?> = compositionLocalOf { null }
 
 @Composable
 fun Scaffold(
@@ -37,37 +42,39 @@ fun Scaffold(
 
     val isOverlayTouchBlockEnabled = overlayBackStackEntry != null && !navigator.isEmpty(ContainerType.OVERLAY)
 
-    Box(modifier = modifier) {
-        NavHost(
-            navController = navigator.mainNavController,
-            startDestination = mainRoutes.startRoute,
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-        ) {
-            registerRoutes(mainRoutes)
-        }
+    CompositionLocalProvider(LocalGlobalNavigator provides navigator) {
+        Box(modifier = modifier) {
+            NavHost(
+                navController = navigator.mainNavController,
+                startDestination = mainRoutes.startRoute,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+            ) {
+                registerRoutes(mainRoutes)
+            }
 
-        NavHost(
-            navController = navigator.overlayNavController,
-            startDestination = overlayRoutes.startRoute,
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .then(
-                    if (isOverlayTouchBlockEnabled) {
-                        Modifier.clickable(
-                            enabled = true,
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { }
-                    } else {
-                        Modifier
-                    }
-                )
-        ) {
-            registerRoutes(overlayRoutes)
+            NavHost(
+                navController = navigator.overlayNavController,
+                startDestination = overlayRoutes.startRoute,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .then(
+                        if (isOverlayTouchBlockEnabled) {
+                            Modifier.clickable(
+                                enabled = true,
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { }
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
+                registerRoutes(overlayRoutes)
+            }
         }
     }
 }

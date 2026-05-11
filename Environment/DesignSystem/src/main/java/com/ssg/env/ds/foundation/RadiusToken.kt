@@ -8,8 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -59,4 +61,20 @@ fun Modifier.border(
         width = width,
         color = color,
         shape = token.shape
+    )
+
+@Stable
+fun Modifier.shadow(
+    elevation: Dp,
+    token: RadiusToken,
+    clip: Boolean = elevation > 0.dp,
+    ambientColor: Color = DefaultShadowColor,
+    spotColor: Color = DefaultShadowColor,
+) = this
+    .shadow(
+        elevation = elevation,
+        shape = token.shape,
+        clip = clip,
+        ambientColor = ambientColor,
+        spotColor = spotColor
     )

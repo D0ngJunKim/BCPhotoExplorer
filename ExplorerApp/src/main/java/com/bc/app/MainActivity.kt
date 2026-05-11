@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import com.bc.env.nav.Scaffold
 import com.bc.feature.generated.nav.MainContainerRoutes
 import com.bc.feature.generated.nav.OverlayContainerRoutes
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val appFinishHelper = AppFinishHelper()
 
