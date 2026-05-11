@@ -10,6 +10,7 @@ data class PhotoItemModel(
     val blurHash: String?,
     val description: String?,
     val altDescription: String?,
+    val trackDownloadUrl: String?,
     val user: PhotoItemUserModel?
 )
 

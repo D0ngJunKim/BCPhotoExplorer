@@ -18,11 +18,12 @@ fun PhotoItemDto.toDomain(): PhotoItemModel? {
         blurHash = blur_hash,
         description = description,
         altDescription = alt_description,
-        user = user?.toModel()
+        trackDownloadUrl = link?.download_location,
+        user = user?.toDomain()
     )
 }
 
-private fun PhotoItemUserDto.toModel() = PhotoItemUserModel(
+private fun PhotoItemUserDto.toDomain() = PhotoItemUserModel(
     id = id,
     profileImageUrl = profile_image?.small,
     username = username,

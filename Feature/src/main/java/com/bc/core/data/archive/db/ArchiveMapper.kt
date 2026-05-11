@@ -1,18 +1,19 @@
-package com.bc.core.data.db.archive
+package com.bc.core.data.archive.db
 
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.domain.model.PhotoItemUserModel
 
-fun PhotoItemModel.toCollectionEntity(): CollectionEntity {
+fun PhotoItemModel.toCollectionEntity(imagePath: String = imageUrl): CollectionEntity {
     return CollectionEntity(
         id = id,
-        imagePath = imageUrl,
+        imagePath = imagePath,
         width = width,
         height = height,
         description = description,
         contentDescription = altDescription,
         primaryColor = primaryColor,
         blurHash = blurHash,
+        trackDownloadUrl = trackDownloadUrl,
         photographer = PhotographerEntity(
             id = user?.id.orEmpty(),
             name = user?.name.orEmpty(),
@@ -38,6 +39,7 @@ fun CollectionEntity.toDomain(): PhotoItemModel {
         blurHash = blurHash,
         description = description,
         altDescription = contentDescription,
+        trackDownloadUrl = trackDownloadUrl,
         user = PhotoItemUserModel(
             id = photographer.id,
             profileImageUrl = photographer.profileUrl,

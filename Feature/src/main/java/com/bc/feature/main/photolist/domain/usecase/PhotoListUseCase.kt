@@ -3,8 +3,7 @@ package com.bc.feature.main.photolist.domain.usecase
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.bc.core.data.db.archive.ArchiveRepository
-import com.bc.core.data.db.archive.toCollectionEntity
+import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.UiItem
 import com.bc.feature.main.photolist.data.repository.PhotoListRepository
@@ -33,9 +32,10 @@ class PhotoListUseCase @Inject constructor(
     suspend fun onToggleLike(data: PhotoItemModel) {
         val collectionIdSet = archiveRepository.collectionIdSet.first()
         if (collectionIdSet.contains(data.id)) {
-            archiveRepository.delete(data.toCollectionEntity())
+            archiveRepository.delete(data)
         } else {
-            archiveRepository.insert(data.toCollectionEntity())
+            archiveRepository.trackDownload(data.trackDownloadUrl)
+            archiveRepository.insert(data)
         }
     }
 }

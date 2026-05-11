@@ -1,4 +1,4 @@
-package com.bc.core.data.db.archive
+package com.bc.core.data.archive.db
 
 import android.content.Context
 import androidx.room.Database
@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Database(entities = [CollectionEntity::class], version = 2, exportSchema = false)
+@Database(entities = [CollectionEntity::class], version = 3, exportSchema = false)
 abstract class ArchiveDatabase : RoomDatabase() {
     abstract fun archiveDao(): ArchiveDao
 }

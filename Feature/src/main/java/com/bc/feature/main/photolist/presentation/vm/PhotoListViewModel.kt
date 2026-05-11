@@ -7,6 +7,7 @@ import com.bc.core.presentation.vm.BaseViewModel
 import com.bc.feature.main.photolist.domain.usecase.PhotoListUseCase
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class PhotoListViewModel @Inject constructor(
     override fun processIntent(intent: PhotoListIntent) {
         when (intent) {
             is PhotoListIntent.OnToggleLike -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO){
                     useCase.onToggleLike(intent.data)
                 }
             }

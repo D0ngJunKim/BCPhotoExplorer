@@ -1,4 +1,4 @@
-package com.bc.core.data.db.archive
+package com.bc.core.data.archive.db
 
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -14,6 +14,7 @@ data class CollectionEntity(
     val contentDescription: String?,
     val primaryColor: String?,
     val blurHash: String?,
+    val trackDownloadUrl: String?,
     @Embedded(prefix = "photographer_")
     val photographer: PhotographerEntity
 )

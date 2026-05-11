@@ -58,6 +58,7 @@ data class PhotoItemUiItem(
     val blurHash: String?,
     val description: String?,
     val altDescription: String?,
+    val trackDownloadUrl: String?,
     val photographer: PhotoItemUserModel?,
     val isArchived: Boolean,
 ) : UiItem<PhotoListIntent>(ListSpan.SINGLE_FOR_ALL) {
@@ -188,6 +189,7 @@ fun PhotoItemModel.toUiItem(isArchived: Boolean = false): PhotoItemUiItem {
         blurHash = blurHash,
         description = description,
         altDescription = altDescription,
+        trackDownloadUrl = trackDownloadUrl,
         photographer = user,
         isArchived = isArchived
     )
@@ -203,6 +205,7 @@ fun PhotoItemUiItem.toDomain(): PhotoItemModel {
         blurHash = blurHash,
         description = description,
         altDescription = altDescription,
+        trackDownloadUrl = trackDownloadUrl,
         user = photographer
     )
 }
@@ -228,6 +231,7 @@ private class DataProvider : PreviewParameterProvider<PhotoItemModel> {
             blurHash = $$"LHEBmV]$D%1OwJnNT0Xms9JUa_NH",
             description = "Vinyl Record Player (IG: @clay.banks)",
             altDescription = "A blue record player with a record on it",
+            trackDownloadUrl = "https://api.unsplash.com/photos/YZZgAMftFuQ/download?ixid=sample",
             user = PhotoItemUserModel(
                 id = "rUXhgOTUmb0",
                 profileImageUrl = "https://images.unsplash.com/profile-1670236743900-356b1ee0dc42image?ixlib=rb-4.1.0&crop=faces&fit=crop&w=32&h=32",

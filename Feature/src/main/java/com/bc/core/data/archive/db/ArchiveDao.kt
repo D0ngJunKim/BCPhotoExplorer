@@ -1,4 +1,4 @@
-package com.bc.core.data.db.archive
+package com.bc.core.data.archive.db
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -16,4 +16,7 @@ interface ArchiveDao {
 
     @Delete
     suspend fun delete(collection: CollectionEntity)
+
+    @Query("SELECT * FROM collection WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): CollectionEntity?
 }
