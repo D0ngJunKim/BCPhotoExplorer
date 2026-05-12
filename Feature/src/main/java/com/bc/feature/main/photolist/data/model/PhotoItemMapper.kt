@@ -18,7 +18,7 @@ fun PhotoItemDto.toDomain(): PhotoItemModel? {
         blurHash = blur_hash,
         description = description,
         altDescription = alt_description,
-        trackDownloadUrl = link?.download_location,
+        trackDownloadUrl = links?.download_location,
         user = user?.toDomain()
     )
 }

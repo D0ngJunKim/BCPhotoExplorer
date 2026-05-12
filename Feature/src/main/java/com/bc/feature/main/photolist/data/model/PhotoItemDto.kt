@@ -15,7 +15,7 @@ data class PhotoItemDto(
     val alt_description: String?,
     val urls: PhotoItemUrlDto?,
     val user: PhotoItemUserDto?,
-    val link: PhotoItemLinkDto?
+    val links: PhotoItemLinkDto?
 )
 
 data class PhotoItemUrlDto(
