@@ -32,8 +32,9 @@ import com.bc.core.presentation.ui.AsyncImageBlurHash
 import com.bc.core.presentation.ui.ListSpan
 import com.bc.core.presentation.ui.UiItem
 import com.bc.core.presentation.util.toComposeColorOrNull
+import com.bc.core.presentation.util.toHexString
+import com.bc.feature.R
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
-import com.ssg.env.ds.R
 import com.ssg.env.ds.component.IconButton
 import com.ssg.env.ds.component.IconButtonColorSet
 import com.ssg.env.ds.component.IconButtonConfig
@@ -67,7 +68,7 @@ data class PhotoItemUiItem(
     @Composable
     override fun SetItem(processIntent: ((PhotoListIntent) -> Unit)) {
         val primaryColor = primaryColor ?: Color.Black
-        
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -109,8 +110,8 @@ data class PhotoItemUiItem(
                     contentDescription = null,
                     modifier = Modifier
                         .size(20.dp)
-                        .clip(RadiusToken.Circle)
                         .background(Color.White, RadiusToken.Circle)
+                        .clip(RadiusToken.Circle)
                 )
 
                 Column {
@@ -165,7 +166,7 @@ data class PhotoItemUiItem(
     }
 }
 
-fun PhotoItemModel.toUiItem(isArchived: Boolean = false): PhotoItemUiItem {
+fun PhotoItemModel.toPhotoItem(isArchived: Boolean = false): PhotoItemUiItem {
     val ratio = width.toFloat() / height.toFloat()
     val primaryColor = primaryColor?.toComposeColorOrNull()
     val textColor = if (primaryColor != null) {
@@ -210,14 +211,10 @@ fun PhotoItemUiItem.toDomain(): PhotoItemModel {
     )
 }
 
-private fun Color.toHexString(): String {
-    return "#%06X".format(0xFFFFFF and toArgb())
-}
-
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 private fun Preview(@PreviewParameter(DataProvider::class) data: PhotoItemModel) {
-    data.toUiItem().BuildItem { }
+    data.toPhotoItem().BuildItem { }
 }
 
 private class DataProvider : PreviewParameterProvider<PhotoItemModel> {

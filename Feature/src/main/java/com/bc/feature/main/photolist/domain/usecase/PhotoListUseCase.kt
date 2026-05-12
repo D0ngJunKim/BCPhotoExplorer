@@ -7,7 +7,7 @@ import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.UiItem
 import com.bc.feature.main.photolist.data.repository.PhotoListRepository
-import com.bc.feature.main.photolist.presentation.unit.toUiItem
+import com.bc.feature.main.photolist.presentation.unit.toPhotoItem
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +25,7 @@ class PhotoListUseCase @Inject constructor(
             archiveRepository.collectionIdSet
         ) { photoList, collectionIdSet ->
             photoList.map { photo ->
-                photo.toUiItem(isArchived = collectionIdSet.contains(photo.id))
+                photo.toPhotoItem(isArchived = collectionIdSet.contains(photo.id))
             }
         }
 
