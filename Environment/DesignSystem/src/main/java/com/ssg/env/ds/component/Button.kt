@@ -22,7 +22,6 @@ import com.ssg.env.ds.R
 import com.ssg.env.ds.composite.LocalText
 import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
-import com.ssg.env.ds.foundation.SpaceTokenValues
 import com.ssg.env.ds.foundation.background
 import com.ssg.env.ds.foundation.border
 import com.ssg.env.ds.foundation.clip
@@ -97,6 +96,7 @@ internal enum class ButtonSize(val height: Dp) {
     MD(32.dp),
     LG(36.dp),
     XL(40.dp),
+    XXL(48.dp)
 }
 
 @Composable
@@ -106,17 +106,17 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    padding: SpaceTokenValues = SpaceTokenValues(all = SpaceToken.Zero)
+    padding: SpaceToken = SpaceToken.Zero
 ) {
     val colorSet = if (enabled) config.normalColorSet else config.disabledColorSet
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = config.heightDp)
             .requiredHeight(config.heightDp)
-            .clip(config.radiusToken)
             .background(colorSet.fillColor, config.radiusToken)
             .border(width = 1.dp, color = colorSet.outlineColor, token = config.radiusToken)
-            .padding(padding)
+            .clip(config.radiusToken)
+            .padding(horizontal = padding)
             .clickable(
                 enabled = enabled,
                 role = Role.Button,
@@ -156,10 +156,11 @@ private fun Preview() {
                 type = ButtonType.MD,
                 radius = ButtonConfig.Option.Radius.RoundRect,
                 normalColorSet = ButtonColorSet(
-                    outlineColor = colorResource(R.color.gray900),
-                    textColor = colorResource(R.color.gray900)
+                    fillColor = colorResource(R.color.primary),
+                    textColor = colorResource(R.color.white)
                 )
             ),
+            padding = SpaceToken.MD,
             text = "버튼",
             onClick = {})
         Button(

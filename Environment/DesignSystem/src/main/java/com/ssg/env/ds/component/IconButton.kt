@@ -26,11 +26,13 @@ import androidx.compose.ui.unit.dp
 import com.ssg.env.ds.R
 import com.ssg.env.ds.composite.LocalImage
 import com.ssg.env.ds.foundation.RadiusToken
+import com.ssg.env.ds.foundation.ShadowToken
 import com.ssg.env.ds.foundation.SpaceToken
 import com.ssg.env.ds.foundation.background
 import com.ssg.env.ds.foundation.border
 import com.ssg.env.ds.foundation.clip
 import com.ssg.env.ds.foundation.padding
+import com.ssg.env.ds.foundation.shadow
 
 sealed class IconButtonType(
     internal val size: IconButtonSize,
@@ -58,7 +60,13 @@ sealed class IconButtonType(
     data object XL : IconButtonType(
         size = IconButtonSize.XL,
         radius = RadiusToken.SM,
-        iconSize = 28.dp
+        iconSize = 24.dp
+    )
+
+    data object XXL : IconButtonType(
+        size = IconButtonSize.XXL,
+        radius = RadiusToken.SM,
+        iconSize = 24.dp
     )
 }
 
@@ -75,7 +83,8 @@ data class IconButtonConfig(
     private val radius: Option.Radius,
     internal val normalColorSet: IconButtonColorSet,
     internal val selectedColorSet: IconButtonColorSet = normalColorSet,
-    internal val disabledColorSet: IconButtonColorSet = normalColorSet
+    internal val disabledColorSet: IconButtonColorSet = normalColorSet,
+    internal val shadowToken: ShadowToken? = null
 ) {
     internal val heightDp = type.size.height
     internal val iconSizeDp = type.iconSize
@@ -101,6 +110,7 @@ internal enum class IconButtonSize(val height: Dp) {
     MD(32.dp),
     LG(36.dp),
     XL(40.dp),
+    XXL(48.dp)
 }
 
 @Composable
@@ -123,9 +133,16 @@ fun IconButton(
         modifier = modifier
             .defaultMinSize(minWidth = config.heightDp)
             .requiredHeight(config.heightDp)
-            .clip(config.radiusToken)
+            .then(
+                if (config.shadowToken != null) {
+                    Modifier.shadow(config.shadowToken, config.radiusToken)
+                } else {
+                    Modifier
+                }
+            )
             .background(colorSet.fillColor, config.radiusToken)
             .border(width = 1.dp, color = colorSet.outlineColor, token = config.radiusToken)
+            .clip(config.radiusToken)
             .padding(horizontal = padding)
             .clickable(
                 enabled = enabled,
