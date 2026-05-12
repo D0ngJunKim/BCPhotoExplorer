@@ -1,6 +1,8 @@
 package com.bc.core.domain.model
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PhotoItemModel(
     val id: String,
     val imageUrl: String,
@@ -14,6 +16,7 @@ data class PhotoItemModel(
     val user: PhotoItemUserModel?
 )
 
+@Serializable
 data class PhotoItemUserModel(
     val id: String?,
     val profileImageUrl: String?,

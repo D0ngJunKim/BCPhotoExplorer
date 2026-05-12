@@ -1,5 +1,7 @@
 package com.bc.env.nav
 
+import android.net.Uri
+import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavType
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -26,7 +31,6 @@ sealed interface IRoute {
 }
 
 sealed interface IRouteConfig {
-    val typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> get() = emptyMap()
     val deepLinks: List<NavDeepLink> get() = emptyList()
 
     interface Screen : IRouteConfig {
@@ -41,6 +45,28 @@ sealed interface IRouteConfig {
 interface GeneratedRouteRegistry {
     val routes: List<KClass<out IRoute>>
     val startRoute: KClass<out IRoute>
+
+    fun typeMap(route: KClass<out IRoute>): Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap()
+}
+
+inline fun <reified T : Any> serializableNavType(): NavType<T> {
+    return object : NavType<T>(isNullableAllowed = false) {
+        override fun put(bundle: Bundle, key: String, value: T) {
+            bundle.putString(key, Json.encodeToString(value))
+        }
+
+        override fun get(bundle: Bundle, key: String): T? {
+            return bundle.getString(key)?.let { Json.decodeFromString<T>(it) }
+        }
+
+        override fun parseValue(value: String): T {
+            return Json.decodeFromString(Uri.decode(value))
+        }
+
+        override fun serializeAsValue(value: T): String {
+            return Uri.encode(Json.encodeToString(value))
+        }
+    }
 }
 
 @Serializable

@@ -10,6 +10,7 @@ android {
 
 dependencies {
     api(libs.kotlinx.serialization.core)
+    api(libs.kotlinx.serialization.json)
     api(libs.androidx.navigation.compose)
     api(libs.hilt.navigation.compose)
     api(libs.kotlin.reflect)

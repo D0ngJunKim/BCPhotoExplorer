@@ -125,7 +125,10 @@ private class RouteContainerProcessor(
             writer.appendLine()
             writer.appendLine("import com.bc.env.nav.GeneratedRouteRegistry")
             writer.appendLine("import com.bc.env.nav.IRoute")
+            writer.appendLine("import androidx.navigation.NavType")
             writer.appendLine("import kotlin.reflect.KClass")
+            writer.appendLine("import kotlin.reflect.KType")
+            writer.appendLine("import kotlin.reflect.typeOf")
             writer.appendLine()
             writer.appendLine("public object $objectName : GeneratedRouteRegistry {")
             writer.appendLine("    override val routes: List<KClass<out IRoute>> = listOf(")
@@ -140,13 +143,60 @@ private class RouteContainerProcessor(
             writer.appendLine()
             val startRouteName = startRoute?.qualifiedName?.asString() ?: "com.bc.env.nav.EmptyRoute"
             writer.appendLine("    override val startRoute: KClass<out IRoute> = $startRouteName::class")
+            writer.appendLine()
+            writer.appendLine("    override fun typeMap(route: KClass<out IRoute>): Map<KType, NavType<*>> = when (route) {")
+            routes.forEach { route ->
+                val entries = route.generatedTypeMapEntries()
+                if (entries.isNotEmpty()) {
+                    writer.appendLine("        ${route.qualifiedName!!.asString()}::class -> mapOf(")
+                    entries.forEach { entry ->
+                        writer.appendLine("            $entry,")
+                    }
+                    writer.appendLine("        )")
+                }
+            }
+            writer.appendLine("        else -> emptyMap()")
+            writer.appendLine("    }")
             writer.appendLine("}")
+        }
+    }
+
+    private fun KSClassDeclaration.generatedTypeMapEntries(): List<String> {
+        return primaryConstructor
+            ?.parameters
+            ?.mapNotNull { parameter ->
+                val type = parameter.type.resolve()
+                val declaration = type.declaration as? KSClassDeclaration ?: return@mapNotNull null
+                if (!declaration.requiresGeneratedNavType()) return@mapNotNull null
+
+                val typeName = declaration.qualifiedName?.asString() ?: return@mapNotNull null
+                "typeOf<$typeName>() to com.bc.env.nav.serializableNavType<$typeName>()"
+            }
+            .orEmpty()
+            .distinct()
+    }
+
+    private fun KSClassDeclaration.requiresGeneratedNavType(): Boolean {
+        val qualifiedName = qualifiedName?.asString() ?: return false
+        if (qualifiedName in NAV_TYPE_SUPPORTED_TYPES) return false
+
+        return annotations.any {
+            it.annotationType.resolve().declaration.qualifiedName?.asString() == SERIALIZABLE_ANNOTATION
         }
     }
 
     private companion object {
         const val ROUTE_TYPE = "com.bc.env.nav.IRoute"
         const val START_ARGUMENT = "start"
+        const val SERIALIZABLE_ANNOTATION = "kotlinx.serialization.Serializable"
+
+        val NAV_TYPE_SUPPORTED_TYPES = setOf(
+            "kotlin.Boolean",
+            "kotlin.Int",
+            "kotlin.Long",
+            "kotlin.Float",
+            "kotlin.String"
+        )
 
         val routeContainerSpecs = listOf(
             RouteContainerSpec(

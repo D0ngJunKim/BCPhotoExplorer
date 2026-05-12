@@ -82,20 +82,24 @@ fun Scaffold(
 private fun NavGraphBuilder.registerRoutes(routeRegistry: GeneratedRouteRegistry) {
     routeRegistry.routes.forEach { route ->
         if (route.isSubclassOf(IRoute.Screen::class)) {
-            registerScreenRoute(route)
+            registerScreenRoute(routeRegistry, route)
         } else if (route.isSubclassOf(IRoute.Dialog::class)) {
-            registerDialogRoute(route)
+            registerDialogRoute(routeRegistry, route)
         }
     }
 }
 
-private fun NavGraphBuilder.registerScreenRoute(routeClass: KClass<out IRoute>) {
+private fun NavGraphBuilder.registerScreenRoute(
+    routeRegistry: GeneratedRouteRegistry,
+    routeClass: KClass<out IRoute>
+) {
     val config = routeClass.resolveScreenConfig()
     val transition = config.transition
+    val typeMap = routeRegistry.typeMap(routeClass)
 
     composable(
         route = routeClass,
-        typeMap = config.typeMap,
+        typeMap = typeMap,
         deepLinks = config.deepLinks,
         enterTransition = transition.enter,
         exitTransition = transition.exit,
@@ -106,13 +110,17 @@ private fun NavGraphBuilder.registerScreenRoute(routeClass: KClass<out IRoute>) 
     }
 }
 
-private fun NavGraphBuilder.registerDialogRoute(routeClass: KClass<out IRoute>) {
+private fun NavGraphBuilder.registerDialogRoute(
+    routeRegistry: GeneratedRouteRegistry,
+    routeClass: KClass<out IRoute>
+) {
     val config = routeClass.resolveDialogConfig()
     val dialogProperties = config.dialogProperties
+    val typeMap = routeRegistry.typeMap(routeClass)
 
     dialog(
         route = routeClass,
-        typeMap = config.typeMap,
+        typeMap = typeMap,
         deepLinks = config.deepLinks,
         dialogProperties = dialogProperties
     ) { backStackEntry ->
