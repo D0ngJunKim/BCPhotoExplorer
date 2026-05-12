@@ -1,5 +1,6 @@
 plugins {
     id("base.library")
+    id("base.hilt")
     alias(libs.plugins.secrets.gradle.plugin)
 }
 
