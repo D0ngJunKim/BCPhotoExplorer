@@ -14,11 +14,9 @@ import com.bc.core.data.archive.source.TrackDownloadDataSource
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.env.network.request.LoadParams
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
