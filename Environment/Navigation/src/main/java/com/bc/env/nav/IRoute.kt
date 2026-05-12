@@ -11,10 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavType
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
@@ -49,10 +48,18 @@ interface GeneratedRouteRegistry {
     fun typeMap(route: KClass<out IRoute>): Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap()
 }
 
+@PublishedApi
+internal val escapedPercent = "\\" + "u0025"
+
+@PublishedApi
+internal fun String.escapePercentForNavigation(): String {
+    return replace("%", escapedPercent)
+}
+
 inline fun <reified T : Any> serializableNavType(): NavType<T> {
     return object : NavType<T>(isNullableAllowed = false) {
         override fun put(bundle: Bundle, key: String, value: T) {
-            bundle.putString(key, Json.encodeToString(value))
+            bundle.putString(key, Json.encodeToString(value).escapePercentForNavigation())
         }
 
         override fun get(bundle: Bundle, key: String): T? {
@@ -60,11 +67,11 @@ inline fun <reified T : Any> serializableNavType(): NavType<T> {
         }
 
         override fun parseValue(value: String): T {
-            return Json.decodeFromString(Uri.decode(value))
+            return Json.decodeFromString(value)
         }
 
         override fun serializeAsValue(value: T): String {
-            return Uri.encode(Json.encodeToString(value))
+            return Uri.encode(Json.encodeToString(value).escapePercentForNavigation())
         }
     }
 }
