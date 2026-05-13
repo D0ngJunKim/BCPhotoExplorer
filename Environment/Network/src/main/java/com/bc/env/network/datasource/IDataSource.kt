@@ -13,7 +13,7 @@ internal sealed interface IDataSource<Params, DataModel>
     val config: DataSourceConfig
         get() = DataSourceConfig()
 
-    fun createCall(retrofit: Retrofit, params: Params?): Call<DataModel>
+    fun createCall(retrofit: Retrofit, params: Params?, pageSize: Int): Call<DataModel>
 
     fun setupGson(builder: GsonBuilder): GsonBuilder = builder
 

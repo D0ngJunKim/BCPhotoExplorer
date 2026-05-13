@@ -14,9 +14,10 @@ abstract class BasePagingSource<DataModel, DomainModel> : PagingSource<PagingLoa
         return try {
             val requestParams = params.key
             val page = requestParams?.page ?: 1
+            val pageSize = params.loadSize
 
             val response = DataSourceCallExecutor.execute(
-                call = DataSourceCallExecutor.createCall(this, requestParams)
+                call = DataSourceCallExecutor.createCall(this, requestParams, pageSize)
             )
             val headers = response.headers()
             val body = response.body() ?: throw NetworkException.EmptyBody()

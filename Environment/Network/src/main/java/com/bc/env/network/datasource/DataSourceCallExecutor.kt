@@ -13,6 +13,14 @@ internal object DataSourceCallExecutor {
         dataSource: IDataSource<Params, DataModel>,
         params: Params?
     ): Call<DataModel> {
+        return createCall(dataSource, params, 1)
+    }
+
+    fun <Params : IParams, DataModel : Any> createCall(
+        dataSource: IDataSource<Params, DataModel>,
+        params: Params?,
+        pageSize: Int
+    ): Call<DataModel> {
         var baseUrl = dataSource.domain.trim()
         if (!URLUtil.isNetworkUrl(baseUrl)) {
             baseUrl = "https://$baseUrl"
@@ -29,7 +37,7 @@ internal object DataSourceCallExecutor {
             setupOkHttp = dataSource::setupOkHttp
         )
 
-        return dataSource.createCall(retrofit, params)
+        return dataSource.createCall(retrofit, params, pageSize)
     }
 
     internal suspend fun <DataModel : Any> execute(call: Call<DataModel>): Response<DataModel> {

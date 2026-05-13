@@ -19,7 +19,8 @@ class PhotoDetailDataSource : BaseDataSource<PhotoItemDto>() {
 
     override fun createCall(
         retrofit: Retrofit,
-        params: LoadParams?
+        params: LoadParams?,
+        pageSize: Int
     ): Call<PhotoItemDto> {
         val id = params?.get(KEY_ID) as? String
         return retrofit.create(Service::class.java).call(id.orEmpty())

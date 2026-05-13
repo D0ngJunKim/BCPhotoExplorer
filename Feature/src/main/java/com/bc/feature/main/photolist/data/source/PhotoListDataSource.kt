@@ -1,13 +1,13 @@
 package com.bc.feature.main.photolist.data.source
 
 import androidx.paging.PagingState
+import com.bc.core.data.model.PhotoItemDto
+import com.bc.core.data.model.toDomain
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.env.network.datasource.BasePagingSource
 import com.bc.env.network.request.PagingLoadParams
 import com.bc.env.network.request.Parameters
 import com.bc.env.network.util.DomainProvider
-import com.bc.core.data.model.PhotoItemDto
-import com.bc.core.data.model.toDomain
 import okhttp3.Headers
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -40,14 +40,18 @@ class PhotoListDataSource : BasePagingSource<List<PhotoItemDto>, PhotoItemModel>
     }
 
     override val domain: String = DomainProvider.unsplash
-
     override val path: String = Service.PATH
 
     override fun createCall(
         retrofit: Retrofit,
-        params: PagingLoadParams?
+        params: PagingLoadParams?,
+        pageSize: Int
     ): Call<List<PhotoItemDto>> {
-        return retrofit.create(Service::class.java).call(params?.toMap())
+        return retrofit.create(Service::class.java).call(
+            queries = params
+                ?.put("per_page", pageSize)
+                ?.toMap()
+        )
     }
 
     private interface Service {

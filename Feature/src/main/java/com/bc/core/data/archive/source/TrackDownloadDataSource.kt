@@ -20,7 +20,8 @@ class TrackDownloadDataSource @Inject constructor() : BaseDataSource<TrackDownlo
 
     override fun createCall(
         retrofit: Retrofit,
-        params: LoadParams?
+        params: LoadParams?,
+        pageSize: Int
     ): Call<TrackDownloadDto> {
         val url = params?.get(KEY_DOWNLOAD_LOCATION) as? String
         return retrofit.create(Service::class.java).call(url.orEmpty())

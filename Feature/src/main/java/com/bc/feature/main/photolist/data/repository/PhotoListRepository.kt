@@ -12,7 +12,8 @@ class PhotoListRepository @Inject constructor(
 ) {
     fun getPhotoList() = Pager(
         config = PagingConfig(
-            pageSize = 20,
+            pageSize = 30,
+            initialLoadSize = 30,
             prefetchDistance = 10
         ),
         initialKey = PagingLoadParams(page = 1),
