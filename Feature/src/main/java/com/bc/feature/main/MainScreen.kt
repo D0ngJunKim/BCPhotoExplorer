@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -49,7 +48,7 @@ import com.bc.env.nav.IRouteConfig
 import com.bc.env.nav.NavTransition
 import com.bc.env.nav.annotation.MainContainer
 import com.bc.feature.R
-import com.bc.feature.main.archive.presentation.ArchiveScreen
+import com.bc.feature.main.archive.presentation.ArchiveListScreen
 import com.bc.feature.main.photolist.presentation.PhotoListScreen
 import com.ssg.env.ds.component.IconButton
 import com.ssg.env.ds.component.IconButtonColorSet
@@ -110,7 +109,7 @@ fun MainScreen() {
             if (isInspectMode.not()) {
                 when (page) {
                     0 -> PhotoListScreen(tabs[page].listState)
-                    1 -> ArchiveScreen(tabs[page].listState)
+                    1 -> ArchiveListScreen(tabs[page].listState)
                 }
             }
         }

@@ -3,7 +3,6 @@ package com.bc.core.presentation.ui
 import android.graphics.Bitmap
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.ssg.env.ds.composite.LocalImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.cos
@@ -133,7 +133,7 @@ private fun AsyncImageBlurHash(
                 .background(primaryColor ?: ComposeColor.LightGray)
         ) {
             if (blurBitmap != null) {
-                Image(
+                LocalImage(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer { alpha = blurAlpha },

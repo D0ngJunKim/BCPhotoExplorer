@@ -67,8 +67,9 @@ class PhotoDetailViewModel @Inject constructor(
             }
             observeArchiveState(data.id)
 
-            val isNetworkConnected = networkMonitor.isConnected.first()
-            if (!isNetworkConnected) {
+            if (networkMonitor.isConnected.first().not()) {
+                _uiState.update { it.copy(isLoading = false) }
+                sendSideEffect(PhotoDetailSideEffect.Toast("네트워크가 연결되어 있지 않습니다.\n잠시 후 다시 시도해주세요."))
                 return@launch
             }
 

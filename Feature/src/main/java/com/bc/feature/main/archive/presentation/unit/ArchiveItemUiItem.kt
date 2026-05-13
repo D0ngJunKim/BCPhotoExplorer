@@ -32,7 +32,7 @@ import com.bc.core.presentation.ui.UiItem
 import com.bc.env.nav.LocalGlobalNavigator
 import com.bc.feature.detail.presentation.DetailRoute
 import com.bc.feature.main.archive.presentation.unit.mapper.toArchiveItem
-import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
+import com.bc.feature.main.archive.presentation.vm.intent.ArchiveListIntent
 import com.ssg.env.ds.composite.LocalText
 import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
@@ -57,11 +57,11 @@ data class ArchiveItemUiItem(
     val profileImageUrl: String?,
     val photographer: String?,
     val origin: PhotoItemModel
-) : UiItem<PhotoListIntent>(ListSpan.SINGLE_FOR_ALL) {
+) : UiItem<ArchiveListIntent>(ListSpan.SINGLE_FOR_ALL) {
     override val itemKey: String = id
 
     @Composable
-    override fun SetItem(processIntent: ((PhotoListIntent) -> Unit)) {
+    override fun SetItem(processIntent: ((ArchiveListIntent) -> Unit)) {
         val primaryColor = primaryColor ?: Color.Black
         val navigator = LocalGlobalNavigator.current
 
@@ -143,7 +143,7 @@ data class ArchiveItemUiItem(
 
             LikeButton(
                 onClick = {
-                    processIntent(PhotoListIntent.OnToggleLike(origin))
+                    processIntent(ArchiveListIntent.OnToggleLike(origin))
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)

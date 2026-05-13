@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 fun LocalCircularProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
-    strokeWidth: Dp = 2.dp,
+    strokeWidth: Dp = 4.dp,
     trackColor: Color = Color.Transparent,
 ) {
     val minSweep = 24f
