@@ -23,11 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -41,7 +37,6 @@ import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.AsyncImageBlurHash
 import com.bc.core.presentation.ui.GridList
 import com.bc.core.presentation.ui.LikeButton
-import com.bc.core.presentation.ui.rememberBlurHashBitmap
 import com.bc.core.presentation.ui.rememberListConfig
 import com.bc.core.presentation.util.toComposeColorOrNull
 import com.bc.core.presentation.vm.observeSideEffects
@@ -61,12 +56,12 @@ import com.ssg.env.ds.component.IconButtonColorSet
 import com.ssg.env.ds.component.IconButtonConfig
 import com.ssg.env.ds.component.IconButtonType
 import com.ssg.env.ds.composite.LocalCircularProgressIndicator
-import com.ssg.env.ds.composite.LocalImage
+import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
+import com.ssg.env.ds.foundation.background
 import com.ssg.env.ds.foundation.padding
 import kotlinx.serialization.Serializable
 import timber.log.Timber
-import kotlin.math.roundToInt
 
 @Serializable
 @MainContainer
@@ -141,13 +136,13 @@ private fun PhotoDetailContent(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(colorResource(R.color.white))
     ) {
         val density = LocalDensity.current
         val imgHeight = maxWidth / ratio
         val imageWidthPx = with(density) { maxWidth.roundToPx() }
         val imgHeightPx = with(density) { imgHeight.roundToPx() }
-        val parallaxScrollPx by remember(gridState, imgHeightPx) {
+        val contentScrollPx by remember(gridState, imgHeightPx) {
             derivedStateOf {
                 if (gridState.firstVisibleItemIndex == 0) {
                     gridState.firstVisibleItemScrollOffset
@@ -156,17 +151,10 @@ private fun PhotoDetailContent(
                 }
             }
         }
-        val parallaxOffsetPx by remember(imgHeightPx) {
+        val backdropOverlapPx = with(density) { 24.dp.roundToPx() }
+        val contentBackgroundOffsetPx by remember(imgHeightPx, backdropOverlapPx) {
             derivedStateOf {
-                (parallaxScrollPx * 0.45f)
-                    .coerceAtMost(imgHeightPx * 0.45f)
-                    .roundToInt()
-            }
-        }
-        val contentBackgroundOffsetPx by remember(imgHeightPx) {
-            derivedStateOf {
-                (imgHeightPx - parallaxScrollPx)
-                    .coerceAtLeast(0)
+                imgHeightPx - contentScrollPx - backdropOverlapPx
             }
         }
 
@@ -178,22 +166,12 @@ private fun PhotoDetailContent(
             height = imgHeightPx,
             primaryColor = primaryColor.copy(alpha = 0.5f),
             modifier = Modifier
-                .offset {
-                    IntOffset(x = 0, y = -parallaxOffsetPx)
-                }
                 .fillMaxWidth()
                 .height(with(density) { imgHeightPx.toDp() })
                 .aspectRatio(ratio)
         )
 
-        BlurContentBackground(
-            photo = photo,
-            primaryColor = primaryColor,
-            width = imageWidthPx,
-            height = imgHeightPx,
-            contentOffsetPx = contentBackgroundOffsetPx,
-            parallaxOffsetPx = parallaxOffsetPx
-        )
+        BackdropContentBackground(contentOffsetPx = contentBackgroundOffsetPx)
 
         GridList(
             state = gridState,
@@ -226,58 +204,13 @@ private fun PhotoDetailContent(
 }
 
 @Composable
-private fun BlurContentBackground(
-    photo: PhotoItemModel,
-    primaryColor: Color,
-    width: Int,
-    height: Int,
-    contentOffsetPx: Int,
-    parallaxOffsetPx: Int
-) {
+private fun BackdropContentBackground(contentOffsetPx: Int) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .offset { IntOffset(x = 0, y = contentOffsetPx) }
-            .clipToBounds()
-    ) {
-        val density = LocalDensity.current
-        val blurBitmap by rememberBlurHashBitmap(
-            blurHash = photo.blurHash,
-            width = width,
-            height = height,
-        )
-
-        Box(
-            modifier = Modifier
-                .offset {
-                    IntOffset(
-                        x = 0,
-                        y = -contentOffsetPx - parallaxOffsetPx
-                    )
-                }
-                .fillMaxWidth()
-                .height(with(density) { height.toDp() })
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.8f))
-            )
-
-            val currentBitmap = blurBitmap
-            if (currentBitmap != null) {
-                LocalImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0.5f),
-                    bitmap = currentBitmap.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-    }
+            .background(colorResource(R.color.white), RadiusToken.XL),
+    )
 }
 
 @Composable
