@@ -7,8 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,9 +21,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -124,7 +135,7 @@ data class PhotoDetailPhotographerUiItem(
                 )
             }
             if (!portfolioUrl.isNullOrBlank()) {
-                Chip(
+                LinkChip(
                     icon = painterResource(R.drawable.ico_link),
                     value = portfolioUrl,
                     color = colorResource(R.color.gray900)
@@ -203,6 +214,60 @@ private fun Chip(
             fontSize = 13.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun LinkChip(
+    icon: Painter,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val linkString = remember(value) {
+        buildAnnotatedString {
+            pushLink(
+                LinkAnnotation.Url(
+                    url = value,
+                    styles = TextLinkStyles(
+                        style = SpanStyle(
+                            textDecoration = TextDecoration.Underline
+                        )
+                    )
+                )
+            )
+            append(value)
+            pop()
+        }
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(SpaceToken.XXXS)
+    ) {
+        var lineBottom by remember { mutableFloatStateOf(0f) }
+
+        LocalImage(
+            painter = icon,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color),
+            modifier = Modifier
+                .size(12.dp)
+                .offset {
+                    val y = ((lineBottom.toDp() - 12.dp) / 2f).roundToPx()
+                    IntOffset(0, y)
+                }
+
+        )
+        LocalText(
+            text = linkString,
+            color = color,
+            fontSize = 13.sp,
+            onTextLayout = {
+                lineBottom = it.getLineBottom(0)
+            }
         )
     }
 }
