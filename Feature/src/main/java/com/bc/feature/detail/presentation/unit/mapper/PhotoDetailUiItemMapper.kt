@@ -50,11 +50,14 @@ fun PhotoItemModel.toMetaUiItem(): PhotoDetailMetaUiItem {
         }
     }
 
+    val tags = tags.mapNotNull { it.title }
+
     return PhotoDetailMetaUiItem(
         width = width,
         height = height,
         cameraModel = exif?.name.orEmpty(),
         updatedAt = updatedDate,
+        tags = tags
     )
 }
 

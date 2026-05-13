@@ -2,6 +2,7 @@ package com.bc.feature.detail.presentation.unit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -22,14 +23,18 @@ import com.bc.feature.detail.presentation.unit.preview.PhotoDetailPreviewData
 import com.bc.feature.detail.presentation.vm.intent.PhotoDetailIntent
 import com.ssg.env.ds.composite.LocalImage
 import com.ssg.env.ds.composite.LocalText
+import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
+import com.ssg.env.ds.foundation.background
+import com.ssg.env.ds.foundation.padding
 import com.ssg.env.ds.foundation.spacedBy
 
 data class PhotoDetailMetaUiItem(
     private val width: Int,
     private val height: Int,
     private val cameraModel: String,
-    private val updatedAt: String
+    private val updatedAt: String,
+    private val tags: List<String>,
 ) : UiItem<PhotoDetailIntent>(ListSpan.FULL_FOR_ALL) {
 
     @Composable
@@ -54,6 +59,24 @@ data class PhotoDetailMetaUiItem(
                 icon = painterResource(R.drawable.ico_maximize),
                 value = "$width x $height"
             )
+
+            if (tags.isNotEmpty()) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = SpaceToken.XXS),
+                    horizontalArrangement = Arrangement.spacedBy(SpaceToken.XXXS),
+                    verticalArrangement = Arrangement.spacedBy(SpaceToken.XXXS),
+                    maxLines = 2
+                ) {
+                    tags.forEach { tag ->
+                        Chip(
+                            icon = painterResource(R.drawable.ico_hash),
+                            value = tag,
+                            spacing = SpaceToken.Zero
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -61,11 +84,14 @@ data class PhotoDetailMetaUiItem(
 @Composable
 private fun Chip(
     icon: Painter,
-    value: String
+    value: String,
+    modifier: Modifier = Modifier,
+    spacing: SpaceToken = SpaceToken.XXXS
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(SpaceToken.XXXS)
+        horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
         LocalImage(
             painter = icon,
