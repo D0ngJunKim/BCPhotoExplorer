@@ -11,10 +11,13 @@ import com.bc.feature.detail.presentation.vm.intent.PhotoDetailIntent
 import com.bc.feature.detail.presentation.vm.intent.PhotoDetailSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,6 +37,7 @@ class PhotoDetailViewModel @Inject constructor(
 ) : BaseViewModel<PhotoDetailSideEffect, PhotoDetailIntent>() {
     private val _uiState = MutableStateFlow(PhotoDetailUiState())
     val uiState: StateFlow<PhotoDetailUiState> = _uiState.asStateFlow()
+    private var archiveStateJob: Job? = null
 
     override fun processIntent(intent: PhotoDetailIntent) {
         when (intent) {
@@ -44,12 +48,8 @@ class PhotoDetailViewModel @Inject constructor(
                         sendSideEffect(PhotoDetailSideEffect.Toast("네트워크가 연결되어 있지 않습니다.\n잠시 후 다시 시도해주세요."))
                         return@launch
                     }
-                    val nextArchived = _uiState.value.isArchived.not()
                     withContext(Dispatchers.IO) {
                         useCase.onToggleLike(photo)
-                    }
-                    _uiState.update { state ->
-                        state.copy(isArchived = nextArchived)
                     }
                 }
             }
@@ -65,11 +65,7 @@ class PhotoDetailViewModel @Inject constructor(
                     photo = data
                 )
             }
-
-            val collectionIdSet = useCase.collectionIdSet.first()
-            _uiState.update { state ->
-                state.copy(isArchived = collectionIdSet.contains(data.id))
-            }
+            observeArchiveState(data.id)
 
             val isNetworkConnected = networkMonitor.isConnected.first()
             if (!isNetworkConnected) {
@@ -95,6 +91,20 @@ class PhotoDetailViewModel @Inject constructor(
                         state.copy(
                             isLoading = false
                         )
+                    }
+                }
+        }
+    }
+
+    private fun observeArchiveState(photoId: String) {
+        archiveStateJob?.cancel()
+        archiveStateJob = viewModelScope.launch {
+            useCase.collectionIdSet
+                .map { collectionIdSet -> collectionIdSet.contains(photoId) }
+                .distinctUntilChanged()
+                .collect { isArchived ->
+                    _uiState.update { state ->
+                        state.copy(isArchived = isArchived)
                     }
                 }
         }
