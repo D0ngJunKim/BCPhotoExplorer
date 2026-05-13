@@ -1,6 +1,12 @@
 package com.bc.feature.main
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -146,25 +152,13 @@ private fun BottomNavBar(
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (isCollapsed) {
-                IconButton(
-                    config = IconButtonConfig(
-                        type = IconButtonType.XL,
-                        radius = IconButtonConfig.Option.Radius.RoundRect,
-                        shadowToken = ShadowToken.MD,
-                        normalColorSet = IconButtonColorSet(
-                            fillColor = Color.White,
-                            iconColor = colorResource(R.color.gray900)
-                        )
-                    ),
-                    painter = painterResource(R.drawable.ico_arrow_up),
-                    buttonDescription = "최상단으로 이동",
-                    onClick = {
-                        tabs[pagerState.currentPage].listState.requestScrollToItem(0)
-                    },
-                    modifier = Modifier.align(Alignment.BottomEnd)
-                )
-            }
+            ScrollToTopButton(
+                visible = isCollapsed,
+                onClick = {
+                    tabs[pagerState.currentPage].listState.requestScrollToItem(0)
+                },
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
 
             TabBar(
                 tabs = tabs,
@@ -172,6 +166,41 @@ private fun BottomNavBar(
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
+    }
+}
+
+@Composable
+private fun ScrollToTopButton(
+    visible: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = tween(durationMillis = 220)
+        ) + fadeIn(animationSpec = tween(durationMillis = 220)),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = tween(durationMillis = 180)
+        ) + fadeOut(animationSpec = tween(durationMillis = 180)),
+        modifier = modifier
+    ) {
+        IconButton(
+            config = IconButtonConfig(
+                type = IconButtonType.XL,
+                radius = IconButtonConfig.Option.Radius.Oval,
+                shadowToken = ShadowToken.MD,
+                normalColorSet = IconButtonColorSet(
+                    fillColor = Color.White,
+                    iconColor = colorResource(R.color.gray900)
+                )
+            ),
+            painter = painterResource(R.drawable.ico_arrow_up),
+            buttonDescription = "최상단으로 이동",
+            onClick = onClick
+        )
     }
 }
 
@@ -187,7 +216,7 @@ private fun TabBar(
         modifier = modifier
             .shadow(ShadowToken.MD, RadiusToken.Circle)
             .background(color = Color.White, token = RadiusToken.Circle)
-            .height(48.dp)
+            .height(40.dp)
             .padding(horizontal = SpaceToken.XXS)
             .clip(RadiusToken.Circle)
     ) {
@@ -215,7 +244,7 @@ private fun TabBar(
                     contentDescription = tab.tabNm,
                     colorFilter = ColorFilter.tint(color),
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                 )
 
                 LocalText(
