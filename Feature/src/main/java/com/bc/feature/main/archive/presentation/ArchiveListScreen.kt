@@ -32,7 +32,7 @@ fun ArchiveListScreen(
 ) {
     val items = viewModel.items.collectAsLazyPagingItems()
     val isLoading = items.loadState.refresh is LoadState.Loading
-    val isEmpty = items.itemCount == 0 && !isLoading
+    val isEmpty = items.itemCount == 0
 
     Box(modifier = Modifier.fillMaxSize()) {
         PagingStaggeredList(
