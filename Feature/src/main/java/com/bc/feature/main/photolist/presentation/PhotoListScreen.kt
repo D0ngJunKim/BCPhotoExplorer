@@ -47,6 +47,7 @@ fun PhotoListScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val items = viewModel.items.collectAsLazyPagingItems()
     val isNetworkConnected by viewModel.isNetworkConnected.collectAsStateWithLifecycle()
+    val hasProblem = items.loadState.source.isIdle || items.loadState.source.hasError
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val job = viewModel.observeSideEffects(lifecycleOwner.lifecycle) { sideEffect ->
@@ -63,9 +64,7 @@ fun PhotoListScreen(
     }
 
     LaunchedEffect(isNetworkConnected) {
-        if (isNetworkConnected &&
-            (items.loadState.source.isIdle || items.loadState.source.hasError)
-        ) {
+        if (isNetworkConnected && hasProblem) {
             items.retry()
         }
     }
@@ -86,7 +85,7 @@ fun PhotoListScreen(
             )
         }
 
-        if (items.itemCount == 0 && !isNetworkConnected) {
+        if (items.itemCount == 0 && (!isNetworkConnected || hasProblem)) {
             NetworkDisconnected()
         }
     }

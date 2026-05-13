@@ -12,7 +12,7 @@ fun PhotoItemDto.toDomain(): PhotoItemModel? {
     if (id.isNullOrEmpty()) return null
     if (width == null || width <= 0) return null
     if (height == null || height <= 0) return null
-    val imageUrl = urls?.small_s3  ?: return null
+    val imageUrl = urls?.regular  ?: return null
 
     return PhotoItemModel(
         id = id,
@@ -35,7 +35,7 @@ fun PhotoItemDto.toDomain(): PhotoItemModel? {
 
 private fun PhotoItemUserDto.toDomain() = PhotoItemUserModel(
     id = id,
-    profileImageUrl = profile_image?.small,
+    profileImageUrl = profile_image?.medium,
     username = username,
     name = name,
     instagramUsername = instagram_username,
