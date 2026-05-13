@@ -132,7 +132,7 @@ fun <Intent : Any> GridList(
 fun <Intent : Any> PagingStaggeredList(
     state: LazyStaggeredGridState,
     viewModel: BaseViewModel<*, Intent>,
-    items: LazyPagingItems<UiItem<Intent>>,
+    items: LazyPagingItems<out UiItem<Intent>>,
     modifier: Modifier = Modifier,
     config: ListConfig = rememberListConfig(),
     footerItem: UiItem<Intent>? = remember { ListFooterUiItem() },

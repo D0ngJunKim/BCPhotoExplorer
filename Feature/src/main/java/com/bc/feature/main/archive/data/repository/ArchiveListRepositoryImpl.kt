@@ -7,14 +7,15 @@ import androidx.paging.map
 import com.bc.core.data.archive.db.ArchiveDao
 import com.bc.core.data.archive.db.toDomain
 import com.bc.core.domain.model.PhotoItemModel
+import com.bc.feature.main.archive.domain.repository.ArchiveListRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class ArchiveListRepository @Inject constructor(
+class ArchiveListRepositoryImpl @Inject constructor(
     private val archiveDao: ArchiveDao,
-) {
-    fun getCollectionList(): Flow<PagingData<PhotoItemModel>> {
+) : ArchiveListRepository {
+    override fun getCollectionList(): Flow<PagingData<PhotoItemModel>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,

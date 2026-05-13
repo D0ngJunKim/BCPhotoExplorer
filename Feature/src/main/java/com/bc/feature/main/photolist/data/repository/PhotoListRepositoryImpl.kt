@@ -4,13 +4,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.bc.env.network.request.PagingLoadParams
 import com.bc.feature.main.photolist.data.source.PhotoListDataSource
+import com.bc.feature.main.photolist.domain.repository.PhotoListRepository
 import javax.inject.Inject
 import javax.inject.Provider
 
-class PhotoListRepository @Inject constructor(
+class PhotoListRepositoryImpl @Inject constructor(
     private val dataSourceProvider: Provider<PhotoListDataSource>
-) {
-    fun getPhotoList() = Pager(
+) : PhotoListRepository {
+    override fun getPhotoList() = Pager(
         config = PagingConfig(
             pageSize = 30,
             initialLoadSize = 30,

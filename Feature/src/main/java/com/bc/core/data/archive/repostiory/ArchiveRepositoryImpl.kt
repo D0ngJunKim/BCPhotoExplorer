@@ -12,6 +12,7 @@ import com.bc.core.data.archive.db.ArchiveDao
 import com.bc.core.data.archive.db.toCollectionEntity
 import com.bc.core.data.archive.source.TrackDownloadDataSource
 import com.bc.core.domain.model.PhotoItemModel
+import com.bc.core.domain.repository.ArchiveRepository
 import com.bc.env.network.request.LoadParams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -22,27 +23,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ArchiveRepository @Inject constructor(
+class ArchiveRepositoryImpl @Inject constructor(
     private val archiveDao: ArchiveDao,
     private val trackDownloadDataSource: TrackDownloadDataSource,
     @ApplicationContext private val context: Context
-) {
-    val collectionIdSet: Flow<Set<String>> = archiveDao.getCollectionIds()
+) : ArchiveRepository {
+    override val collectionIdSet: Flow<Set<String>> = archiveDao.getCollectionIds()
         .map { it.toSet() }
         .distinctUntilChanged()
 
-    suspend fun insert(photo: PhotoItemModel) {
+    override suspend fun insert(photo: PhotoItemModel) {
         val localImagePath = downloadAndSaveImage(photo)
         archiveDao.insert(photo.toCollectionEntity(imagePath = localImagePath ?: photo.imageUrl))
     }
 
-    suspend fun delete(photo: PhotoItemModel) {
+    override suspend fun delete(photo: PhotoItemModel) {
         val collection = archiveDao.getById(photo.id) ?: return
         File(collection.imagePath).takeIf { it.exists() }?.delete()
         archiveDao.delete(collection)
     }
 
-    suspend fun trackDownload(trackDownloadUrl: String?) {
+    override suspend fun trackDownload(trackDownloadUrl: String?) {
         if (trackDownloadUrl.isNullOrBlank()) return
         trackDownloadDataSource.load(
             LoadParams().put(

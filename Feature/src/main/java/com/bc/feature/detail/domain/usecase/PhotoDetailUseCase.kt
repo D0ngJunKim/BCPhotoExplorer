@@ -1,8 +1,8 @@
 package com.bc.feature.detail.domain.usecase
 
-import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
-import com.bc.feature.detail.data.repository.PhotoDetailRepository
+import com.bc.core.domain.repository.ArchiveRepository
+import com.bc.feature.detail.domain.repository.PhotoDetailRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject

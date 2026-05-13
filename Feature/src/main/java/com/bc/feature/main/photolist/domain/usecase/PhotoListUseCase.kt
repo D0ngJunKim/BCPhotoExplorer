@@ -1,17 +1,10 @@
 package com.bc.feature.main.photolist.domain.usecase
 
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.map
-import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
-import com.bc.core.presentation.ui.UiItem
-import com.bc.feature.main.photolist.data.repository.PhotoListRepository
-import com.bc.feature.main.photolist.presentation.unit.mapper.toPhotoItem
-import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
-import kotlinx.coroutines.CoroutineScope
+import com.bc.core.domain.repository.ArchiveRepository
+import com.bc.feature.main.photolist.domain.repository.PhotoListRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -19,15 +12,10 @@ class PhotoListUseCase @Inject constructor(
     private val photoListRepository: PhotoListRepository,
     private val archiveRepository: ArchiveRepository
 ) {
-    fun getPhotoList(scope: CoroutineScope): Flow<PagingData<UiItem<PhotoListIntent>>> =
-        combine(
-            photoListRepository.getPhotoList().cachedIn(scope),
-            archiveRepository.collectionIdSet
-        ) { photoList, collectionIdSet ->
-            photoList.map { photo ->
-                photo.toPhotoItem(isArchived = collectionIdSet.contains(photo.id))
-            }
-        }
+    val collectionIdSet: Flow<Set<String>> = archiveRepository.collectionIdSet
+
+    fun getPhotoList(): Flow<PagingData<PhotoItemModel>> =
+        photoListRepository.getPhotoList()
 
     suspend fun onToggleLike(data: PhotoItemModel) {
         val collectionIdSet = archiveRepository.collectionIdSet.first()

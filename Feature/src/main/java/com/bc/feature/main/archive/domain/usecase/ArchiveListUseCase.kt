@@ -1,29 +1,18 @@
 package com.bc.feature.main.archive.domain.usecase
 
 import androidx.paging.PagingData
-import androidx.paging.map
-import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
-import com.bc.core.presentation.ui.UiItem
-import com.bc.feature.main.archive.data.repository.ArchiveListRepository
-import com.bc.feature.main.archive.presentation.unit.mapper.toArchiveItem
-import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
+import com.bc.core.domain.repository.ArchiveRepository
+import com.bc.feature.main.archive.domain.repository.ArchiveListRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ArchiveListUseCase @Inject constructor(
     private val archiveListRepository: ArchiveListRepository,
     private val archiveRepository: ArchiveRepository
 ) {
-    fun getPhotoList(): Flow<PagingData<UiItem<PhotoListIntent>>> {
-        return archiveListRepository.getCollectionList()
-            .map { pagingData ->
-                pagingData.map { photo ->
-                    photo.toArchiveItem()
-                }
-            }
-    }
+    fun getPhotoList(): Flow<PagingData<PhotoItemModel>> =
+        archiveListRepository.getCollectionList()
 
     suspend fun onToggleLike(data: PhotoItemModel) {
         archiveRepository.delete(data)

@@ -1,18 +1,19 @@
 package com.bc.feature.main.photolist.presentation.vm
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import com.bc.core.presentation.ui.UiItem
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.bc.core.presentation.vm.BaseViewModel
 import com.bc.env.network.util.NetworkMonitor
 import com.bc.feature.main.photolist.domain.usecase.PhotoListUseCase
+import com.bc.feature.main.photolist.presentation.unit.mapper.toPhotoItem
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,8 +25,14 @@ class PhotoListViewModel @Inject constructor(
     private val useCase: PhotoListUseCase,
     private val networkMonitor: NetworkMonitor
 ) : BaseViewModel<PhotoListSideEffect, PhotoListIntent>() {
-    val items: Flow<PagingData<UiItem<PhotoListIntent>>> =
-        useCase.getPhotoList(viewModelScope)
+    val items = combine(
+        useCase.getPhotoList().cachedIn(viewModelScope),
+        useCase.collectionIdSet
+    ) { photoList, collectionIdSet ->
+        photoList.map { photo ->
+            photo.toPhotoItem(isArchived = collectionIdSet.contains(photo.id))
+        }
+    }
 
     val isNetworkConnected: StateFlow<Boolean> = networkMonitor.isConnected
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
