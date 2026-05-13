@@ -6,7 +6,7 @@ import com.bc.core.data.archive.repostiory.ArchiveRepository
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.UiItem
 import com.bc.feature.main.archive.data.repository.ArchiveListRepository
-import com.bc.feature.main.archive.presentation.unit.toArchiveItem
+import com.bc.feature.main.archive.presentation.unit.mapper.toArchiveItem
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

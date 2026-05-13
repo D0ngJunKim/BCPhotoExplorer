@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -78,8 +80,8 @@ class MainRoute : IRoute.Screen {
 fun MainScreen() {
     val isInspectMode = LocalInspectionMode.current
     val tabs = listOf(
-        TabInfo(R.drawable.ico_compass, "탐색", rememberLazyGridState()),
-        TabInfo(R.drawable.ico_heart, "좋아요", rememberLazyGridState())
+        TabInfo(R.drawable.ico_compass, "탐색", rememberLazyStaggeredGridState()),
+        TabInfo(R.drawable.ico_heart, "좋아요", rememberLazyStaggeredGridState())
     )
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -89,6 +91,7 @@ fun MainScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
     ) {
         HorizontalPager(
             userScrollEnabled = false,
@@ -193,7 +196,10 @@ private fun TabBar(
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(1f)
-                    .clickable {
+                    .clickable(
+                        interactionSource = null,
+                        indication = null
+                    ) {
                         scope.launch {
                             tab.listState.stopScroll()
                             pagerState.scrollToPage(tabs.indexOf(tab))
@@ -227,7 +233,7 @@ private fun TabBar(
 private data class TabInfo(
     @DrawableRes val iconResId: Int,
     val tabNm: String,
-    val listState: LazyGridState
+    val listState: LazyStaggeredGridState
 )
 
 @Composable

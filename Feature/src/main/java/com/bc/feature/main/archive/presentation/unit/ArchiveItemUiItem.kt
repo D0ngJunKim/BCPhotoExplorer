@@ -1,5 +1,6 @@
 package com.bc.feature.main.archive.presentation.unit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -24,16 +24,16 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import coil3.compose.AsyncImage
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.domain.model.PhotoItemUserModel
 import com.bc.core.presentation.ui.AsyncImageBlurHash
 import com.bc.core.presentation.ui.ListSpan
 import com.bc.core.presentation.ui.UiItem
-import com.bc.core.presentation.util.toComposeColorOrNull
-import com.bc.core.presentation.util.toHexString
+import com.bc.env.nav.LocalGlobalNavigator
 import com.bc.feature.R
+import com.bc.feature.detail.presentation.DetailRoute
+import com.bc.feature.main.archive.presentation.unit.mapper.toArchiveItem
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
 import com.ssg.env.ds.component.IconButton
 import com.ssg.env.ds.component.IconButtonColorSet
@@ -60,17 +60,26 @@ data class ArchiveItemUiItem(
     val description: String?,
     val altDescription: String?,
     val trackDownloadUrl: String?,
-    val photographer: PhotoItemUserModel?
+    val profileImageUrl: String?,
+    val photographer: String?,
+    val origin: PhotoItemModel
 ) : UiItem<PhotoListIntent>(ListSpan.SINGLE_FOR_ALL) {
     override val itemKey: String = id
 
     @Composable
     override fun SetItem(processIntent: ((PhotoListIntent) -> Unit)) {
         val primaryColor = primaryColor ?: Color.Black
+        val navigator = LocalGlobalNavigator.current
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(
+                    interactionSource = null,
+                    indication = null,
+                    onClick = {
+                        navigator?.navigate(DetailRoute(origin))
+                    })
         ) {
             BoxWithConstraints(
                 modifier = Modifier
@@ -105,7 +114,7 @@ data class ArchiveItemUiItem(
                 horizontalArrangement = Arrangement.spacedBy(SpaceToken.XXXS)
             ) {
                 AsyncImage(
-                    model = photographer?.profileImageUrl,
+                    model = profileImageUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .size(20.dp)
@@ -114,9 +123,9 @@ data class ArchiveItemUiItem(
                 )
 
                 Column {
-                    if (!photographer?.name.isNullOrEmpty()) {
+                    if (!photographer.isNullOrEmpty()) {
                         LocalText(
-                            text = photographer.name,
+                            text = photographer,
                             color = textColor,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
@@ -153,7 +162,7 @@ data class ArchiveItemUiItem(
                 ),
                 painter = painterResource(R.drawable.ico_heart),
                 onClick = {
-                    processIntent(PhotoListIntent.OnToggleLike(toDomain()))
+                    processIntent(PhotoListIntent.OnToggleLike(origin))
                 },
                 buttonDescription = "좋아요",
                 modifier = Modifier
@@ -163,50 +172,6 @@ data class ArchiveItemUiItem(
             )
         }
     }
-}
-
-fun PhotoItemModel.toArchiveItem(): ArchiveItemUiItem {
-    val ratio = width.toFloat() / height.toFloat()
-    val primaryColor = primaryColor?.toComposeColorOrNull()
-    val textColor = if (primaryColor != null) {
-        if (ColorUtils.calculateLuminance(primaryColor.toArgb()) > 0.5f) {
-            Color.Black
-        } else {
-            Color.White
-        }
-    } else {
-        Color.White
-    }
-
-    return ArchiveItemUiItem(
-        id = id,
-        imageUrl = imageUrl,
-        width = width,
-        height = height,
-        ratio = ratio,
-        primaryColor = primaryColor,
-        textColor = textColor,
-        blurHash = blurHash,
-        description = description,
-        altDescription = altDescription,
-        trackDownloadUrl = trackDownloadUrl,
-        photographer = user
-    )
-}
-
-fun ArchiveItemUiItem.toDomain(): PhotoItemModel {
-    return PhotoItemModel(
-        id = id,
-        imageUrl = imageUrl,
-        width = width,
-        height = height,
-        primaryColor = primaryColor?.toHexString(),
-        blurHash = blurHash,
-        description = description,
-        altDescription = altDescription,
-        trackDownloadUrl = trackDownloadUrl,
-        user = photographer
-    )
 }
 
 @Composable
@@ -219,6 +184,7 @@ private class DataProvider : PreviewParameterProvider<PhotoItemModel> {
     override val values = sequenceOf(
         PhotoItemModel(
             id = "YZZgAMftFuQ",
+            updatedAt = "2023-09-20T14:20:00Z",
             imageUrl = "https://images.unsplash.com/photo-1773062189964-75a471b19934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5Mzk3NDl8MHwxfGFsbHwzfHx8fHx8fHwxNzc4MDQ5NTI5fA&ixlib=rb-4.1.0&q=80&w=1080",
             width = 3400,
             height = 2267,
@@ -238,7 +204,7 @@ private class DataProvider : PreviewParameterProvider<PhotoItemModel> {
                 location = "New York",
                 totalLikes = 513,
                 totalPhotos = 1865
-            )
+            ),
         )
     )
 }

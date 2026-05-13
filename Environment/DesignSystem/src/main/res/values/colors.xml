@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFF</color>
-    <color name="gray800">#777777</color>
+    <color name="gray100">#fafafa</color>
+    <color name="gray200">#f0f0f0</color>
+    <color name="gray300">#e5e5e5</color>
+    <color name="gray400">#969696</color>
+    <color name="gray500">#888888</color>
+    <color name="gray600">#777777</color>
+    <color name="gray700">#666666</color>
+    <color name="gray800">#444444</color>
     <color name="gray900">#222222</color>
     <color name="primary">#FF5B59</color>
 </resources>

@@ -36,10 +36,10 @@ class PhotoListViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (networkMonitor.isConnected.first().not()) {
                         sendSideEffect(PhotoListSideEffect.Toast("네트워크가 연결되어 있지 않습니다.\n잠시 후 다시 시도해주세요."))
-                    } else {
-                        withContext(Dispatchers.IO) {
-                            useCase.onToggleLike(intent.data)
-                        }
+                        return@launch
+                    }
+                    withContext(Dispatchers.IO) {
+                        useCase.onToggleLike(intent.data)
                     }
                 }
             }

@@ -11,6 +11,10 @@ import retrofit2.http.Url
 import javax.inject.Inject
 
 class TrackDownloadDataSource @Inject constructor() : BaseDataSource<TrackDownloadDto>() {
+    companion object {
+        const val KEY_DOWNLOAD_LOCATION = "download_location"
+    }
+
     override val domain: String = DomainProvider.unsplash
     override var path: String = Service.PATH
 
@@ -20,10 +24,6 @@ class TrackDownloadDataSource @Inject constructor() : BaseDataSource<TrackDownlo
     ): Call<TrackDownloadDto> {
         val url = params?.get(KEY_DOWNLOAD_LOCATION) as? String
         return retrofit.create(Service::class.java).call(url.orEmpty())
-    }
-
-    companion object {
-        const val KEY_DOWNLOAD_LOCATION = "download_location"
     }
 
     private interface Service {

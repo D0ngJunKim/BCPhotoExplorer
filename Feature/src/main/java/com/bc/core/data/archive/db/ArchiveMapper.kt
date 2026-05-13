@@ -6,6 +6,7 @@ import com.bc.core.domain.model.PhotoItemUserModel
 fun PhotoItemModel.toCollectionEntity(imagePath: String = imageUrl): CollectionEntity {
     return CollectionEntity(
         id = id,
+        updatedAt = updatedAt,
         imagePath = imagePath,
         width = width,
         height = height,
@@ -32,6 +33,7 @@ fun PhotoItemModel.toCollectionEntity(imagePath: String = imageUrl): CollectionE
 fun CollectionEntity.toDomain(): PhotoItemModel {
     return PhotoItemModel(
         id = id,
+        updatedAt = updatedAt,
         imageUrl = imagePath,
         width = width,
         height = height,
@@ -51,6 +53,6 @@ fun CollectionEntity.toDomain(): PhotoItemModel {
             location = photographer.location,
             totalLikes = photographer.totalLikes,
             totalPhotos = photographer.totalPhotos
-        )
+        ),
     )
 }

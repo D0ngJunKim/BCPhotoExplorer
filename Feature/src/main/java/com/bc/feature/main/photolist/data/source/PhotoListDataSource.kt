@@ -6,8 +6,8 @@ import com.bc.env.network.datasource.BasePagingSource
 import com.bc.env.network.request.PagingLoadParams
 import com.bc.env.network.request.Parameters
 import com.bc.env.network.util.DomainProvider
-import com.bc.feature.main.photolist.data.model.PhotoItemDto
-import com.bc.feature.main.photolist.data.model.toDomain
+import com.bc.core.data.model.PhotoItemDto
+import com.bc.core.data.model.toDomain
 import okhttp3.Headers
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -47,8 +47,7 @@ class PhotoListDataSource : BasePagingSource<List<PhotoItemDto>, PhotoItemModel>
         retrofit: Retrofit,
         params: PagingLoadParams?
     ): Call<List<PhotoItemDto>> {
-        return retrofit.create(Service::class.java)
-            .call(params?.toMap())
+        return retrofit.create(Service::class.java).call(params?.toMap())
     }
 
     private interface Service {

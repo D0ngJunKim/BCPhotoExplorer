@@ -49,7 +49,6 @@ fun Scaffold(
                 startDestination = mainRoutes.startRoute,
                 modifier = Modifier
                     .fillMaxSize()
-                    .statusBarsPadding()
                     .navigationBarsPadding()
             ) {
                 registerRoutes(mainRoutes)

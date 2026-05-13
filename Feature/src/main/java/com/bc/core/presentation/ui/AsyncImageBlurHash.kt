@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -40,31 +41,78 @@ fun AsyncImageBlurHash(
     primaryColor: ComposeColor? = null,
     contentScale: ContentScale = ContentScale.Crop
 ) {
-    val blurBitmap by produceState<Bitmap?>(initialValue = null, blurHash, width, height) {
-        if (blurHash == null || width <= 0 || height <= 0) {
+    val blurBitmapState = rememberBlurHashBitmap(
+        blurHash = blurHash,
+        width = width,
+        height = height
+    )
+
+    AsyncImageBlurHash(
+        model = model,
+        blurHash = blurHash,
+        blurBitmap = blurBitmapState.value,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        primaryColor = primaryColor,
+        contentScale = contentScale
+    )
+}
+
+@Composable
+fun rememberBlurHashBitmap(
+    blurHash: String?,
+    width: Int,
+    height: Int
+): State<Bitmap?> {
+    val blurHashSpec = remember(blurHash, width, height) {
+        blurHash?.takeIf { width > 0 && height > 0 }?.let {
+            val decodeWidth = BlurHashBitmapWidth
+            val decodeHeight = (decodeWidth * height.toFloat() / width)
+                .roundToInt()
+                .coerceAtLeast(1)
+
+            BlurHashBitmapSpec(
+                blurHash = it,
+                width = decodeWidth,
+                height = decodeHeight
+            )
+        }
+    }
+    return produceState(
+        initialValue = null,
+        blurHashSpec
+    ) {
+        val spec: BlurHashBitmapSpec? = blurHashSpec
+        if (spec == null) {
             value = null
             return@produceState
         }
 
         value = withContext(Dispatchers.Default) {
             try {
-                val decodeWidth = BlurHashBitmapWidth
-                val decodeHeight = (decodeWidth * height.toFloat() / width)
-                    .roundToInt()
-                    .coerceAtLeast(1)
-
                 BlurHashDecoder.decode(
-                    blurHash = blurHash,
-                    width = decodeWidth,
-                    height = decodeHeight,
-                    useCache = false
+                    blurHash = spec.blurHash,
+                    width = spec.width,
+                    height = spec.height,
+                    useCache = true
                 )
             } catch (_: Exception) {
                 null
             }
         }
     }
+}
 
+@Composable
+private fun AsyncImageBlurHash(
+    model: Any,
+    blurHash: String?,
+    blurBitmap: Bitmap?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    primaryColor: ComposeColor? = null,
+    contentScale: ContentScale = ContentScale.Crop
+) {
     if (blurHash != null) {
         val context = LocalContext.current
         var imageLoaded by remember(model) { mutableStateOf(false) }
@@ -80,19 +128,24 @@ fun AsyncImageBlurHash(
             ImageRequest.Builder(context).data(model).build()
         }
 
-        Box(modifier = modifier) {
-            val currentBlurBitmap = blurBitmap
-            if (currentBlurBitmap != null) {
+        Box(
+            modifier = modifier
+                .background(primaryColor ?: ComposeColor.LightGray)
+        ) {
+            if (blurBitmap != null) {
                 Image(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer { alpha = blurAlpha },
-                    bitmap = currentBlurBitmap.asImageBitmap(),
+                    bitmap = blurBitmap.asImageBitmap(),
                     contentScale = ContentScale.Crop,
                     contentDescription = null
                 )
             } else if (!imageLoaded) {
-                InternalBox(primaryColor)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
             }
 
             AsyncImage(
@@ -123,17 +176,14 @@ fun AsyncImageBlurHash(
     }
 }
 
-@Composable
-private fun InternalBox(primaryColor: ComposeColor?) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(primaryColor ?: ComposeColor.LightGray)
-    )
-}
-
 private const val BlurHashBitmapWidth = 32
 private const val CrossfadeDurationMillis = 700
+
+private data class BlurHashBitmapSpec(
+    val blurHash: String,
+    val width: Int,
+    val height: Int
+)
 
 
 object BlurHashDecoder {

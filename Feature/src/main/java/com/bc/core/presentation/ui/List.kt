@@ -9,6 +9,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
@@ -23,7 +27,6 @@ import com.ssg.env.ds.composite.LocalExpandLayout
 import com.ssg.env.ds.foundation.SpaceToken
 import com.ssg.env.ds.foundation.SpaceTokenValues
 import com.ssg.env.ds.foundation.spacedBy
-import java.util.UUID
 
 private const val COLUMN_ON_TABLET = 4
 private const val COLUMN_ON_MOBILE = 2
@@ -34,24 +37,33 @@ enum class ListSpan(private val mobileSpanCount: Int, private val tabletSpanCoun
     SINGLE_FOR_ALL(1, 1);
 
     companion object {
-        fun getColumn(isTablet: Boolean): GridCells {
+        fun getGridCells(isTablet: Boolean): GridCells {
             return GridCells.Fixed(if (isTablet) COLUMN_ON_TABLET else COLUMN_ON_MOBILE)
+        }
+
+        fun getStaggeredGridCells(isTablet: Boolean): StaggeredGridCells {
+            return StaggeredGridCells.Fixed(if (isTablet) COLUMN_ON_TABLET else COLUMN_ON_MOBILE)
         }
     }
 
-    fun getSpanCount(isTablet: Boolean): Int {
-        return if (isTablet) tabletSpanCount else mobileSpanCount
+    fun getGridSpan(isTablet: Boolean): GridItemSpan {
+        return GridItemSpan(if (isTablet) tabletSpanCount else mobileSpanCount)
+    }
+
+    fun getStaggerGridSpan(isTablet: Boolean): StaggeredGridItemSpan {
+        val count = if (isTablet) tabletSpanCount else mobileSpanCount
+        return if (count == 1) StaggeredGridItemSpan.SingleLane else StaggeredGridItemSpan.FullLine
     }
 }
 
 
 @Composable
-fun <Intent : Any> PagingList(
+fun <Intent : Any> GridList(
     state: LazyGridState,
+    viewModel: BaseViewModel<*, Intent>,
+    items: List<UiItem<Intent>>,
     modifier: Modifier = Modifier,
     config: ListConfig = rememberListConfig(),
-    viewModel: BaseViewModel<*, Intent>,
-    items: LazyPagingItems<UiItem<Intent>>,
     footerItem: UiItem<Intent>? = remember { ListFooterUiItem() },
 ) {
     val configuration = LocalConfiguration.current
@@ -60,7 +72,7 @@ fun <Intent : Any> PagingList(
     }
 
     LazyVerticalGrid(
-        columns = ListSpan.getColumn(isTablet),
+        columns = ListSpan.getGridCells(isTablet),
         state = state,
         modifier = modifier,
         contentPadding = SpaceTokenValues(horizontal = config.edgeSpace),
@@ -68,8 +80,8 @@ fun <Intent : Any> PagingList(
         verticalArrangement = Arrangement.spacedBy(config.verticalDividerSpace),
         overscrollEffect = null,
     ) {
-        for (index in 0 until items.itemCount) {
-            val item = items.peek(index) ?: continue
+        for (index in 0 until items.size) {
+            val item = items.getOrNull(index) ?: continue
 
             if (item.isStickable) {
                 stickyHeader(
@@ -84,15 +96,15 @@ fun <Intent : Any> PagingList(
                 item(
                     key = item.itemKey,
                     contentType = item::class,
-                    span = { GridItemSpan(item.span.getSpanCount(isTablet)) }
+                    span = { item.span.getGridSpan(isTablet) }
 
                 ) {
-                    items[index]?.BuildItem(viewModel::processIntent)
+                    item.BuildItem(viewModel::processIntent)
                 }
             }
         }
 
-        if (footerItem != null && items.itemCount > 0) {
+        if (footerItem != null && items.isNotEmpty()) {
             if (footerItem.isStickable) {
                 stickyHeader(
                     key = footerItem.itemKey,
@@ -102,12 +114,59 @@ fun <Intent : Any> PagingList(
                         footerItem.BuildItem(viewModel::processIntent)
                     }
                 }
+            } else {
+                item(
+                    key = footerItem.itemKey,
+                    contentType = footerItem::class,
+                    span = { footerItem.span.getGridSpan(isTablet) }
+
+                ) {
+                    footerItem.BuildItem(viewModel::processIntent)
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun <Intent : Any> PagingStaggeredList(
+    state: LazyStaggeredGridState,
+    viewModel: BaseViewModel<*, Intent>,
+    items: LazyPagingItems<UiItem<Intent>>,
+    modifier: Modifier = Modifier,
+    config: ListConfig = rememberListConfig(),
+    footerItem: UiItem<Intent>? = remember { ListFooterUiItem() },
+) {
+    val configuration = LocalConfiguration.current
+    val isTablet = remember(configuration) {
+        (configuration.screenLayout and (Configuration.SCREENLAYOUT_SIZE_MASK)) >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    }
+
+    LazyVerticalStaggeredGrid(
+        columns = ListSpan.getStaggeredGridCells(isTablet),
+        state = state,
+        modifier = modifier,
+        contentPadding = SpaceTokenValues(horizontal = config.edgeSpace),
+        horizontalArrangement = Arrangement.spacedBy(config.horizontalDividerSpace),
+        verticalItemSpacing = Arrangement.spacedBy(config.verticalDividerSpace).spacing,
+        overscrollEffect = null,
+    ) {
+        for (index in 0 until items.itemCount) {
+            val item = items.peek(index) ?: continue
+            item(
+                key = item.itemKey,
+                contentType = item::class,
+                span = item.span.getStaggerGridSpan(isTablet)
+            ) {
+                items[index]?.BuildItem(viewModel::processIntent)
+            }
+        }
+
+        if (footerItem != null && items.itemCount > 0) {
             item(
                 key = footerItem.itemKey,
                 contentType = footerItem::class,
-                span = { GridItemSpan(footerItem.span.getSpanCount(isTablet)) }
-
+                span = footerItem.span.getStaggerGridSpan(isTablet)
             ) {
                 footerItem.BuildItem(viewModel::processIntent)
             }
@@ -158,23 +217,6 @@ data class ListConfig(
                 },
             )
     }
-}
-
-abstract class UiItem<Intent : Any>(val span: ListSpan = ListSpan.FULL_FOR_ALL) {
-    open val itemKey: String = UUID.randomUUID().toString()
-    open val isStickable: Boolean = false
-
-    @Composable
-    fun BuildItem(
-        processIntent: ((Intent) -> Unit)
-    ) {
-        SetItem(processIntent)
-    }
-
-    @Composable
-    protected abstract fun SetItem(
-        processIntent: ((Intent) -> Unit)
-    )
 }
 
 private class ListFooterUiItem<Intent : Any> : UiItem<Intent>() {

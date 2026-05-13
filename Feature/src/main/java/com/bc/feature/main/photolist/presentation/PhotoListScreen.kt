@@ -1,24 +1,25 @@
 package com.bc.feature.main.photolist.presentation
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -26,7 +27,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.bc.core.presentation.ui.PagingList
+import com.bc.core.presentation.ui.PagingStaggeredList
 import com.bc.core.presentation.vm.observeSideEffects
 import com.bc.feature.R
 import com.bc.feature.main.photolist.presentation.vm.PhotoListViewModel
@@ -39,7 +40,7 @@ import com.ssg.env.ds.foundation.padding
 
 @Composable
 fun PhotoListScreen(
-    state: LazyGridState = rememberLazyGridState(),
+    state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     viewModel: PhotoListViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -62,13 +63,15 @@ fun PhotoListScreen(
     }
 
     LaunchedEffect(isNetworkConnected) {
-        if (isNetworkConnected && items.loadState.source.hasError) {
+        if (isNetworkConnected &&
+            (items.loadState.source.isIdle || items.loadState.source.hasError)
+        ) {
             items.retry()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        PagingList(
+        PagingStaggeredList(
             state = state,
             viewModel = viewModel,
             items = items
@@ -92,7 +95,9 @@ fun PhotoListScreen(
 @Composable
 private fun NetworkDisconnected() {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -117,10 +122,4 @@ private fun NetworkDisconnected() {
                 .padding(top = SpaceToken.XXXS)
         )
     }
-}
-
-@Composable
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-private fun Preview() {
-    NetworkDisconnected()
 }

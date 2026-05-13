@@ -1,6 +1,6 @@
 @file:Suppress("PropertyName")
 
-package com.bc.feature.main.photolist.data.model
+package com.bc.core.data.model
 
 data class PhotoItemDto(
     val id: String?,
@@ -15,7 +15,10 @@ data class PhotoItemDto(
     val alt_description: String?,
     val urls: PhotoItemUrlDto?,
     val user: PhotoItemUserDto?,
-    val links: PhotoItemLinkDto?
+    val links: PhotoItemLinkDto?,
+    val exif: PhotoItemExifDto?,
+    val location: PhotoItemLocationDto?,
+    val tags: List<PhotoItemTagDto>?
 )
 
 data class PhotoItemUrlDto(
@@ -52,4 +55,31 @@ data class PhotoItemLinkDto(
     val html: String?,
     val download: String?,
     val download_location: String?
+)
+
+data class PhotoItemExifDto(
+    val make: String?,
+    val model: String?,
+    val name: String?,
+    val exposure_time: String?,
+    val aperture: String?,
+    val focal_length: String?,
+    val iso: Int?
+)
+
+data class PhotoItemLocationDto(
+    val name: String?,
+    val city: String?,
+    val country: String?,
+    val position: PhotoItemLocationPositionDto?
+)
+
+data class PhotoItemLocationPositionDto(
+    val latitude: Double?,
+    val longitude: Double?
+)
+
+data class PhotoItemTagDto(
+    val title: String?,
+    val type: String?
 )

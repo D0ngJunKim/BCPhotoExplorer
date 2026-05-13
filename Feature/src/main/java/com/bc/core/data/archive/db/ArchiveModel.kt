@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Database(entities = [CollectionEntity::class], version = 3, exportSchema = false)
+@Database(entities = [CollectionEntity::class], version = 4, exportSchema = false)
 abstract class ArchiveDatabase : RoomDatabase() {
     abstract fun archiveDao(): ArchiveDao
 }

@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "collection")
 data class CollectionEntity(
     @PrimaryKey val id: String,
+    val updatedAt: String?,
     val imagePath: String,
     val width: Int,
     val height: Int,
