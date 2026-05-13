@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,17 +26,13 @@ import coil3.compose.AsyncImage
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.domain.model.PhotoItemUserModel
 import com.bc.core.presentation.ui.AsyncImageBlurHash
+import com.bc.core.presentation.ui.LikeButton
 import com.bc.core.presentation.ui.ListSpan
 import com.bc.core.presentation.ui.UiItem
 import com.bc.env.nav.LocalGlobalNavigator
-import com.bc.feature.R
 import com.bc.feature.detail.presentation.DetailRoute
 import com.bc.feature.main.archive.presentation.unit.mapper.toArchiveItem
 import com.bc.feature.main.photolist.presentation.vm.intent.PhotoListIntent
-import com.ssg.env.ds.component.IconButton
-import com.ssg.env.ds.component.IconButtonColorSet
-import com.ssg.env.ds.component.IconButtonConfig
-import com.ssg.env.ds.component.IconButtonType
 import com.ssg.env.ds.composite.LocalText
 import com.ssg.env.ds.foundation.RadiusToken
 import com.ssg.env.ds.foundation.SpaceToken
@@ -147,24 +141,10 @@ data class ArchiveItemUiItem(
                 }
             }
 
-            IconButton(
-                config = IconButtonConfig(
-                    type = IconButtonType.MD,
-                    radius = IconButtonConfig.Option.Radius.Oval,
-                    normalColorSet = IconButtonColorSet(
-                        fillColor = Color.White,
-                        iconColor = colorResource(R.color.gray900)
-                    ),
-                    selectedColorSet = IconButtonColorSet(
-                        fillColor = Color.White,
-                        iconColor = colorResource(R.color.primary)
-                    )
-                ),
-                painter = painterResource(R.drawable.ico_heart),
+            LikeButton(
                 onClick = {
                     processIntent(PhotoListIntent.OnToggleLike(origin))
                 },
-                buttonDescription = "좋아요",
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(all = SpaceToken.XXXS),

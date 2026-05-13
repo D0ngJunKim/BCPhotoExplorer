@@ -44,8 +44,12 @@ class PhotoDetailViewModel @Inject constructor(
                         sendSideEffect(PhotoDetailSideEffect.Toast("네트워크가 연결되어 있지 않습니다.\n잠시 후 다시 시도해주세요."))
                         return@launch
                     }
+                    val nextArchived = _uiState.value.isArchived.not()
                     withContext(Dispatchers.IO) {
                         useCase.onToggleLike(photo)
+                    }
+                    _uiState.update { state ->
+                        state.copy(isArchived = nextArchived)
                     }
                 }
             }

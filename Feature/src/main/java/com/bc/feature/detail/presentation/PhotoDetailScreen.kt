@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.AsyncImageBlurHash
 import com.bc.core.presentation.ui.GridList
+import com.bc.core.presentation.ui.LikeButton
 import com.bc.core.presentation.ui.rememberBlurHashBitmap
 import com.bc.core.presentation.ui.rememberListConfig
 import com.bc.core.presentation.util.toComposeColorOrNull
@@ -310,23 +311,10 @@ private fun Header(
             buttonDescription = "뒤로가기"
         )
 
-        IconButton(
-            config = IconButtonConfig(
-                type = IconButtonType.XL,
-                radius = IconButtonConfig.Option.Radius.Oval,
-                normalColorSet = IconButtonColorSet(
-                    fillColor = Color.White,
-                    iconColor = colorResource(R.color.gray900)
-                ),
-                selectedColorSet = IconButtonColorSet(
-                    fillColor = Color.White,
-                    iconColor = colorResource(R.color.primary)
-                )
-            ),
-            painter = painterResource(R.drawable.ico_heart),
+        LikeButton(
             onClick = onToggleLike,
-            buttonDescription = "좋아요",
-            selected = isArchived
+            selected = isArchived,
+            type = IconButtonType.XL
         )
     }
 }
