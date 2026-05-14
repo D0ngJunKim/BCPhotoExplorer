@@ -1,7 +1,8 @@
 package com.bc.core.presentation.ui
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -41,20 +42,26 @@ fun LikeButton(
     val scale = remember { Animatable(1f) }
     var isLoading by remember { mutableStateOf(false) }
     var previousSelected by remember { mutableStateOf(selected) }
+    var hasPendingUserClick by remember { mutableStateOf(false) }
 
     LaunchedEffect(selected) {
         if (previousSelected != selected) {
             previousSelected = selected
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-            scale.snapTo(0.88f)
-            scale.animateTo(1.14f, animationSpec = tween(durationMillis = 120))
-            scale.animateTo(1f, animationSpec = tween(durationMillis = 140))
-        }
-    }
-
-    LaunchedEffect(selected) {
-        if (previousSelected == selected) {
             isLoading = false
+
+            if (hasPendingUserClick) {
+                hasPendingUserClick = false
+                hapticFeedback.performHapticFeedback(if (selected) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+                scale.snapTo(
+                    targetValue = 0.8f
+                )
+                scale.animateTo(
+                    targetValue = 1f, animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioHighBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+            }
         }
     }
 
@@ -79,6 +86,7 @@ fun LikeButton(
             ),
             painter = painterResource(R.drawable.ico_heart),
             onClick = {
+                hasPendingUserClick = true
                 isLoading = true
                 onClick()
             },
