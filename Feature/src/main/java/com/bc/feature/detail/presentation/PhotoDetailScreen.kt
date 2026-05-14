@@ -46,7 +46,7 @@ import com.bc.env.nav.LocalGlobalNavigator
 import com.bc.env.nav.NavTransition
 import com.bc.env.nav.annotation.MainContainer
 import com.bc.feature.R
-import com.bc.feature.detail.presentation.unit.mapper.withParallaxSpacing
+import com.bc.feature.detail.presentation.unit.mapper.getDataListWithBackdropSpacing
 import com.bc.feature.detail.presentation.vm.PhotoDetailUiState
 import com.bc.feature.detail.presentation.vm.PhotoDetailViewModel
 import com.bc.feature.detail.presentation.vm.intent.PhotoDetailIntent
@@ -176,7 +176,7 @@ private fun PhotoDetailContent(
         GridList(
             state = gridState,
             viewModel = viewModel,
-            items = uiState.dataList.withParallaxSpacing(imgHeight),
+            items = uiState.getDataListWithBackdropSpacing(imgHeight),
             modifier = Modifier.fillMaxSize(),
             config = rememberListConfig(
                 edgeSpace = SpaceToken.SM,

@@ -4,18 +4,19 @@ import androidx.compose.ui.unit.Dp
 import com.bc.core.domain.model.PhotoItemModel
 import com.bc.core.presentation.ui.UiItem
 import com.bc.core.presentation.util.addNotNull
+import com.bc.feature.detail.presentation.unit.PhotoDetailBackdropSpacerUiItem
 import com.bc.feature.detail.presentation.unit.PhotoDetailMetaUiItem
-import com.bc.feature.detail.presentation.unit.PhotoDetailParallaxSpacerUiItem
 import com.bc.feature.detail.presentation.unit.PhotoDetailPhotographerUiItem
 import com.bc.feature.detail.presentation.unit.PhotoDetailSummaryUiItem
+import com.bc.feature.detail.presentation.vm.PhotoDetailUiState
 import com.bc.feature.detail.presentation.vm.intent.PhotoDetailIntent
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-fun List<UiItem<PhotoDetailIntent>>.withParallaxSpacing(height: Dp): List<UiItem<PhotoDetailIntent>> {
-    return listOf(PhotoDetailParallaxSpacerUiItem(height = height)) + this
+fun PhotoDetailUiState.getDataListWithBackdropSpacing(height: Dp): List<UiItem<PhotoDetailIntent>> {
+    return listOf(PhotoDetailBackdropSpacerUiItem(photo = photo, height = height)) + dataList
 }
 
 fun PhotoItemModel.toPhotoDetailList(): List<UiItem<PhotoDetailIntent>> {

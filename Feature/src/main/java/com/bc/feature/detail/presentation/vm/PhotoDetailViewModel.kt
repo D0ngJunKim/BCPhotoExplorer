@@ -78,11 +78,10 @@ class PhotoDetailViewModel @Inject constructor(
             }
             result
                 .onSuccess { result ->
-                    val detail = result.mergeFallback(data)
                     _uiState.update { state ->
                         state.copy(
-                            photo = detail,
-                            dataList = detail.toPhotoDetailList(),
+                            photo = result,
+                            dataList = result.toPhotoDetailList(),
                             isLoading = false
                         )
                     }
@@ -110,22 +109,4 @@ class PhotoDetailViewModel @Inject constructor(
                 }
         }
     }
-}
-
-private fun PhotoItemModel.mergeFallback(fallback: PhotoItemModel): PhotoItemModel {
-    return copy(
-        imageUrl = imageUrl.ifBlank { fallback.imageUrl },
-        width = width.takeIf { it > 0 } ?: fallback.width,
-        height = height.takeIf { it > 0 } ?: fallback.height,
-        primaryColor = primaryColor ?: fallback.primaryColor,
-        blurHash = blurHash ?: fallback.blurHash,
-        description = description ?: fallback.description,
-        altDescription = altDescription ?: fallback.altDescription,
-        trackDownloadUrl = trackDownloadUrl ?: fallback.trackDownloadUrl,
-        user = user ?: fallback.user,
-        links = links ?: fallback.links,
-        exif = exif ?: fallback.exif,
-        location = location ?: fallback.location,
-        tags = tags.ifEmpty { fallback.tags }
-    )
 }

@@ -79,7 +79,8 @@ private class RouteContainerProcessor(
             packageName = options[spec.packageOption].orEmpty().ifBlank { spec.defaultPackage },
             objectName = options[spec.objectOption].orEmpty().ifBlank { spec.defaultObject },
             routes = routes,
-            startRoute = startRoutes.firstOrNull() ?: routes.firstOrNull(),
+            startRoute = startRoutes.firstOrNull() ?: routes.firstOrNull().takeUnless { spec.emptyRouteAsDefaultStart },
+            includeEmptyRoute = spec.emptyRouteAsDefaultStart,
             originatingFiles = routes.mapNotNull { it.containingFile }.distinct()
         )
     }
@@ -112,6 +113,7 @@ private class RouteContainerProcessor(
         objectName: String,
         routes: List<KSClassDeclaration>,
         startRoute: KSClassDeclaration?,
+        includeEmptyRoute: Boolean,
         originatingFiles: List<KSFile>
     ) {
         val file = codeGenerator.createNewFile(
@@ -132,12 +134,11 @@ private class RouteContainerProcessor(
             writer.appendLine()
             writer.appendLine("public object $objectName : GeneratedRouteRegistry {")
             writer.appendLine("    override val routes: List<KClass<out IRoute>> = listOf(")
-            if (routes.isEmpty()) {
+            if (includeEmptyRoute || routes.isEmpty()) {
                 writer.appendLine("        com.bc.env.nav.EmptyRoute::class,")
-            } else {
-                routes.forEach { route ->
-                    writer.appendLine("        ${route.qualifiedName!!.asString()}::class,")
-                }
+            }
+            routes.forEach { route ->
+                writer.appendLine("        ${route.qualifiedName!!.asString()}::class,")
             }
             writer.appendLine("    )")
             writer.appendLine()
@@ -205,7 +206,8 @@ private class RouteContainerProcessor(
                 packageOption = "mainContainer.package",
                 objectOption = "mainContainer.object",
                 defaultPackage = "com.bc.generated.nav",
-                defaultObject = "MainContainerRoutes"
+                defaultObject = "MainContainerRoutes",
+                emptyRouteAsDefaultStart = false
             ),
             RouteContainerSpec(
                 simpleName = "OverlayContainer",
@@ -213,7 +215,8 @@ private class RouteContainerProcessor(
                 packageOption = "overlayContainer.package",
                 objectOption = "overlayContainer.object",
                 defaultPackage = "com.bc.generated.nav",
-                defaultObject = "OverlayContainerRoutes"
+                defaultObject = "OverlayContainerRoutes",
+                emptyRouteAsDefaultStart = true
             )
         )
     }
@@ -225,5 +228,6 @@ private data class RouteContainerSpec(
     val packageOption: String,
     val objectOption: String,
     val defaultPackage: String,
-    val defaultObject: String
+    val defaultObject: String,
+    val emptyRouteAsDefaultStart: Boolean
 )
