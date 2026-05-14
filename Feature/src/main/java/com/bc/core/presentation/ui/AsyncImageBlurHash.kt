@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -115,7 +116,7 @@ private fun AsyncImageBlurHash(
 ) {
     if (blurHash != null) {
         val context = LocalContext.current
-        var imageLoaded by remember(model) { mutableStateOf(false) }
+        var imageLoaded by rememberSaveable(model) { mutableStateOf(false) }
         val imageAlpha by animateFloatAsState(
             targetValue = if (imageLoaded) 1f else 0f,
             animationSpec = tween(durationMillis = CrossfadeDurationMillis)
